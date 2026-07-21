@@ -1,0 +1,2184 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard ยอดขาย</title>
+<style>
+  :root {
+    color-scheme: light;
+    --page: #eef0f4;
+    --sidebar: #d7dae0;
+    --sidebar-ink: #3a3f4a;
+    --sidebar-muted: #7a8090;
+    --card-blue: #1348b8;
+    --card-blue-deep: #0e3a99;
+    --card-orange: #e06a1f;
+    --card-orange-deep: #c55a12;
+    --chip-red: #cf3a30;
+    --os-todo: #e23b30;
+    --os-prep: #f0a81a;
+    --os-ship: #2f74e6;
+    --os-done: #17a355;
+    --os-prep-ink: #3a2b00;
+    --on-blue: #ffffff;
+    --on-blue-soft: rgba(255,255,255,0.72);
+    --inset: #ffffff;
+    --inset-ink: #14161c;
+    --inset-muted: #6a7080;
+    --hairline: #e3e5ea;
+    --grid: #edeef2;
+    --accent: #1348b8;
+    --accent-soft: #e7edfb;
+    --good: #0a7d3c;
+    --bad: #c22f2f;
+    --best-bg: #d9f5ec;
+    --best-ink: #0b6b4e;
+    --warn-ink: #8a6100;
+    --s1: #2a78d6;  /* โซฟา */
+    --s2: #eda100;  /* เก้าอี้ */
+    --s3: #4a3aa7;  /* โต๊ะ */
+    --s4: #eb6834;  /* ตู้ */
+    --ch1: #2a78d6; /* TikTok */
+    --ch2: #1baf7a; /* Google */
+    --ch3: #eda100; /* Instagram */
+    --ch4: #008300; /* LINE */
+    --ch5: #4a3aa7; /* Facebook */
+    --pill-bg: #b5dcff;
+    --pill-ink: #0b2a5c;
+    --shadow: 0 10px 28px rgba(19,72,184,0.16);
+    --shadow-orange: 0 10px 28px rgba(224,106,31,0.22);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      color-scheme: dark;
+      --page: #101114;
+      --sidebar: #1b1d23;
+      --sidebar-ink: #d6d9e0;
+      --sidebar-muted: #8b8f9b;
+      --card-blue: #123b96;
+      --card-blue-deep: #0d2f7c;
+      --card-orange: #b5560f;
+      --card-orange-deep: #96460b;
+      --chip-red: #b32e25;
+      --os-todo: #e2554a;
+      --os-prep: #e6a92a;
+      --os-ship: #4f8bee;
+      --os-done: #22b563;
+      --os-prep-ink: #2a1f00;
+      --inset: #23252c;
+      --inset-ink: #eceef2;
+      --inset-muted: #9aa0ad;
+      --hairline: #34363e;
+      --grid: #2e3038;
+      --accent: #5b8ff0;
+      --accent-soft: #1d2740;
+      --good: #4cd98a;
+      --bad: #f08787;
+      --best-bg: #12382e;
+      --best-ink: #63dcb4;
+      --s1: #3987e5;
+      --s2: #c98500;
+      --s3: #9085e9;
+      --s4: #d95926;
+      --shadow: 0 10px 28px rgba(0,0,0,0.45);
+      --shadow-orange: 0 10px 28px rgba(0,0,0,0.45);
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --page: #101114;
+    --sidebar: #1b1d23;
+    --sidebar-ink: #d6d9e0;
+    --sidebar-muted: #8b8f9b;
+    --card-blue: #123b96;
+    --card-blue-deep: #0d2f7c;
+    --card-orange: #b5560f;
+    --card-orange-deep: #96460b;
+    --chip-red: #b32e25;
+    --os-todo: #e2554a;
+    --os-prep: #e6a92a;
+    --os-ship: #4f8bee;
+    --os-done: #22b563;
+    --os-prep-ink: #2a1f00;
+    --inset: #23252c;
+    --inset-ink: #eceef2;
+    --inset-muted: #9aa0ad;
+    --hairline: #34363e;
+    --grid: #2e3038;
+    --accent: #5b8ff0;
+    --accent-soft: #1d2740;
+    --good: #4cd98a;
+    --bad: #f08787;
+    --best-bg: #12382e;
+    --best-ink: #63dcb4;
+    --warn-ink: #f2c14e;
+    --s1: #3987e5;
+    --s2: #c98500;
+    --s3: #9085e9;
+    --s4: #d95926;
+    --ch1: #3987e5;
+    --ch2: #199e70;
+    --ch3: #c98500;
+    --ch4: #008300;
+    --ch5: #9085e9;
+    --pill-bg: #1d3a66;
+    --pill-ink: #cfe4ff;
+    --shadow: 0 10px 28px rgba(0,0,0,0.45);
+    --shadow-orange: 0 10px 28px rgba(0,0,0,0.45);
+  }
+
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body {
+    margin: 0;
+    background: var(--page);
+    font-family: "Noto Sans Thai", "Leelawadee UI", "Segoe UI", system-ui, sans-serif;
+    color: var(--inset-ink);
+    min-height: 100vh;
+  }
+  .app { display: flex; min-height: 100vh; }
+
+  /* ── Sidebar ─────────────────────────── */
+  .sidebar {
+    width: 216px;
+    flex: 0 0 216px;
+    background: var(--sidebar);
+    border-radius: 0 26px 26px 0;
+    padding: 26px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .sidebar .brand {
+    font-weight: 800;
+    font-size: 1.05rem;
+    color: var(--sidebar-ink);
+    padding: 0 12px 18px;
+    letter-spacing: 0.02em;
+  }
+  .nav-group { display: flex; flex-direction: column; }
+  .nav-main {
+    display: flex; align-items: center; justify-content: space-between;
+    width: 100%;
+    background: none; border: 0; cursor: pointer;
+    font: inherit; font-weight: 700; font-size: 0.92rem;
+    color: var(--sidebar-ink);
+    padding: 10px 12px; border-radius: 10px;
+  }
+  .nav-main:hover { background: rgba(19,72,184,0.08); }
+  .nav-main.active { background: var(--accent-soft); color: var(--accent); }
+  .nav-main .chev { transition: transform 0.18s; font-size: 0.7rem; color: var(--sidebar-muted); }
+  .nav-group.open .chev { transform: rotate(90deg); }
+  .nav-sub { display: none; flex-direction: column; padding-left: 10px; }
+  .nav-group.open .nav-sub { display: flex; }
+  .nav-sub button {
+    text-align: left; background: none; border: 0; cursor: pointer;
+    font: inherit; font-size: 0.86rem; color: var(--sidebar-muted);
+    padding: 8px 12px; border-radius: 9px;
+  }
+  .nav-sub button:hover { color: var(--sidebar-ink); background: rgba(19,72,184,0.07); }
+  .nav-sub button.active {
+    color: var(--accent); font-weight: 700;
+    background: var(--accent-soft);
+  }
+  .nav-main.soon { cursor: default; color: var(--sidebar-muted); font-weight: 600; }
+  .nav-main.soon:hover { background: none; }
+  .nav-main .tag {
+    font-size: 0.62rem; font-weight: 700; letter-spacing: 0.05em;
+    color: var(--sidebar-muted); border: 1px solid currentColor;
+    border-radius: 99px; padding: 1px 7px;
+  }
+
+  /* ── Main ────────────────────────────── */
+  .main { flex: 1; padding: 26px 30px 40px; min-width: 0; }
+  h1 {
+    text-align: center; margin: 0 0 22px;
+    font-size: 1.45rem; font-weight: 800; letter-spacing: 0.01em;
+  }
+
+  .card-blue {
+    background: linear-gradient(160deg, var(--card-blue), var(--card-blue-deep));
+    border-radius: 26px;
+    padding: 24px;
+    color: var(--on-blue);
+    box-shadow: var(--shadow);
+  }
+  .card-orange {
+    background: linear-gradient(160deg, var(--card-orange), var(--card-orange-deep));
+    border-radius: 26px;
+    padding: 22px;
+    color: #fff;
+    box-shadow: var(--shadow-orange);
+  }
+  .card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+  .card-head h2 { margin: 0; font-size: 1rem; font-weight: 700; }
+  .more-link {
+    background: none; border: 0; cursor: pointer; font: inherit;
+    font-size: 0.78rem; font-weight: 700; color: var(--on-blue-soft);
+    padding: 3px 8px; border-radius: 8px; white-space: nowrap;
+  }
+  .more-link:hover { background: rgba(255,255,255,0.16); color: #fff; }
+
+  /* ══ PAGE: หน้าหลัก ══════════════════════════════════════ */
+  .home-layout {
+    display: grid;
+    grid-template-columns: minmax(430px, 11fr) minmax(380px, 9fr);
+    gap: 22px;
+    align-items: start;
+    max-width: 1240px;
+    margin: 0 auto;
+  }
+  .home-col { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+
+  .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .stat-card {
+    border-radius: 20px; padding: 16px 16px 12px;
+    display: flex; flex-direction: column; min-width: 0;
+  }
+  .stat-card .s-label { font-size: 0.82rem; font-weight: 600; color: var(--on-blue-soft); margin: 0 0 4px; }
+  .stat-card .s-value { font-size: 1.55rem; font-weight: 800; line-height: 1.15; margin: 0; }
+  .stat-card .s-sub { font-size: 0.72rem; color: var(--on-blue-soft); margin: 3px 0 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .s-delta {
+    display: inline-flex; align-items: center; gap: 5px;
+    margin-top: 7px; padding: 2px 9px; border-radius: 99px;
+    font-size: 0.7rem; font-weight: 700;
+    background: rgba(255,255,255,0.14);
+    align-self: flex-start; white-space: nowrap;
+  }
+  .s-delta.up .num { color: #8ef0b6; }
+  .s-delta.down .num { color: #ffb3b3; }
+  .s-delta .vs { color: var(--on-blue-soft); font-weight: 500; }
+  .stat-card .more-link { margin-top: auto; align-self: flex-end; padding-top: 8px; }
+
+  /* low stock */
+  .stock-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .stock-tile {
+    background: var(--inset); color: var(--inset-ink);
+    border-radius: 16px; padding: 12px 10px;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    text-align: center; min-width: 0;
+  }
+  .stock-tile .pic {
+    width: 100%; aspect-ratio: 4/3; border-radius: 12px;
+    background: var(--accent-soft);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .stock-tile .pic svg { width: 68%; height: auto; }
+  .stock-tile .nm { font-size: 0.74rem; font-weight: 700; line-height: 1.25; }
+  .stock-tile .cd { font-size: 0.66rem; color: var(--inset-muted); }
+  .stock-tile .left {
+    font-size: 0.72rem; font-weight: 800; color: var(--bad);
+    background: color-mix(in srgb, var(--bad) 12%, transparent);
+    border-radius: 99px; padding: 2px 10px;
+  }
+
+  /* orders */
+  .chip-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
+  .order-chip {
+    background: var(--chip-red); border-radius: 16px;
+    padding: 12px 6px 13px; text-align: center; color: #fff;
+  }
+  .order-chip.chip-todo { background: var(--os-todo); }
+  .order-chip.chip-prep { background: var(--os-prep); color: var(--os-prep-ink); }
+  .order-chip.chip-ship { background: var(--os-ship); }
+  .order-chip.chip-done { background: var(--os-done); }
+  .order-chip .c-label { font-size: 0.72rem; font-weight: 700; opacity: 0.92; }
+  .order-chip .c-num { font-size: 1.45rem; font-weight: 800; line-height: 1.2; font-variant-numeric: tabular-nums; }
+  .ship-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .ship-box { background: rgba(255,255,255,0.16); border-radius: 16px; padding: 12px 12px 10px; min-width: 0; }
+  .ship-box h3 { margin: 0 0 8px; font-size: 0.86rem; font-weight: 800; }
+  .ship-box .hint { font-size: 0.64rem; font-weight: 500; opacity: 0.85; margin-left: 6px; }
+  .ship-rows { display: flex; flex-direction: column; gap: 6px; }
+  .ship-row {
+    background: var(--inset); color: var(--inset-ink);
+    border-radius: 11px; padding: 7px 10px;
+    border-left: 4px solid var(--hairline);
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    font-size: 0.74rem; min-width: 0;
+  }
+  .ship-row.stage-todo { border-left-color: var(--os-todo); }
+  .ship-row.stage-prep { border-left-color: var(--os-prep); }
+  .ship-row.stage-ship { border-left-color: var(--os-ship); }
+  .ship-row .pid { min-width: 0; }
+  .ship-row .pid b { display: block; font-size: 0.76rem; }
+  .ship-row .pid span { color: var(--inset-muted); font-size: 0.66rem; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ship-right { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; flex: 0 0 auto; }
+  .stage-tag { font-size: 0.64rem; font-weight: 800; border-radius: 99px; padding: 2px 10px; white-space: nowrap; color: #fff; }
+  .stage-tag.st-todo { background: var(--os-todo); color: #fff; }
+  .stage-tag.st-prep { background: var(--os-prep); color: var(--os-prep-ink); }
+  .stage-tag.st-ship { background: var(--os-ship); color: #fff; }
+  .ship-row .dl { font-weight: 800; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .ship-row .dl.urgent { color: var(--bad); }
+  .ship-row .dl.calm { color: var(--inset-muted); }
+
+  /* top categories */
+  .rank-panel { background: var(--inset); color: var(--inset-ink); border-radius: 16px; padding: 14px 16px 8px; }
+  .rank-panel svg { width: 100%; height: auto; display: block; }
+
+  /* ══ Sub pages (คำสั่งซื้อ / ยอดเข้าชม / สต๊อก) ══ */
+  .sub-layout { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+  .back-btn {
+    align-self: flex-start; background: none; border: 0; cursor: pointer;
+    font: inherit; font-weight: 700; font-size: 0.86rem;
+    color: var(--accent); padding: 6px 12px; border-radius: 10px;
+  }
+  .back-btn:hover { background: var(--accent-soft); }
+  .table-panel { background: var(--inset); color: var(--inset-ink); border-radius: 16px; padding: 6px 16px; overflow-x: auto; }
+  .data-table { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
+  .data-table th {
+    text-align: left; font-size: 0.72rem; color: var(--inset-muted); font-weight: 700;
+    padding: 11px 8px 7px; border-bottom: 1px solid var(--hairline); white-space: nowrap;
+  }
+  .data-table td { padding: 9px 8px; border-bottom: 1px solid var(--grid); vertical-align: middle; }
+  .data-table tr:last-child td { border-bottom: 0; }
+  .data-table tbody tr.clickable { cursor: pointer; }
+  .data-table tbody tr.clickable:hover td { background: var(--accent-soft); }
+  .data-table .rank { font-weight: 800; color: var(--accent); }
+  .data-table .goto { color: var(--inset-muted); font-size: 0.72rem; white-space: nowrap; }
+
+  /* ══ PAGE: ออเดอร์ทั้งหมด (ตาราง 4 สถานะ) ══ */
+  .wide-layout { max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+  .ot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .ot-card { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  .ot-title {
+    background: var(--inset); color: var(--inset-ink);
+    border-radius: 99px; text-align: center;
+    font-weight: 800; font-size: 1rem; padding: 11px;
+  }
+  .ot-card .table-panel { flex: 1; }
+  .stars { color: var(--os-prep); letter-spacing: 1px; font-size: 0.82rem; }
+  .stage-tag.tag-express { background: var(--s4); color: #fff; }
+  .stage-tag.tag-normal { background: #6b7280; color: #fff; }
+  @media (max-width: 860px) { .ot-grid { grid-template-columns: 1fr; } }
+  .data-table .num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .st-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 0.72rem; font-weight: 700; border-radius: 99px; padding: 2px 10px; white-space: nowrap;
+  }
+  .st-pill::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+  .st-todo { color: var(--bad); background: color-mix(in srgb, var(--bad) 12%, transparent); }
+  .st-prep { color: var(--warn-ink); background: color-mix(in srgb, var(--warn-ink) 14%, transparent); }
+  .st-ship { color: var(--accent); background: var(--accent-soft); }
+  .st-done { color: var(--good); background: color-mix(in srgb, var(--good) 12%, transparent); }
+  .span-all { grid-column: 1 / -1; justify-self: start; }
+
+  /* trend card (หน้าคำสั่งซื้อ / สินค้า) */
+  .trend-controls { display: flex; flex-wrap: wrap; gap: 10px; }
+  .trend-controls input, .trend-controls select {
+    font: inherit; font-size: 0.84rem; font-weight: 600; border: 0;
+    border-radius: 99px; padding: 10px 18px; background: #ffffff; color: #14161c;
+  }
+  .trend-controls select {
+    appearance: none; -webkit-appearance: none; cursor: pointer;
+    padding-right: 40px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2314161c' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 16px center; background-size: 12px 8px;
+  }
+  .trend-controls input { flex: 1 1 200px; min-width: 160px; }
+  .trend-controls input:focus-visible, .trend-controls select:focus-visible,
+  .search-btn:focus-visible {
+    outline: 2px solid #fff; outline-offset: 2px;
+  }
+  .search-btn {
+    font: inherit; font-weight: 800; font-size: 0.86rem; border: 0; cursor: pointer;
+    border-radius: 99px; padding: 10px 26px;
+    background: #6fd376; color: #0c3a14;
+  }
+  .search-btn:hover { background: #83dd89; }
+  .trend-controls + .trend-controls { margin-top: 10px; }
+
+  /* หน้าเชิงลึกสินค้า: กล่องกราฟ 3 ช่อง */
+  .detail-charts {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 14px; margin-top: 14px;
+  }
+  .chart-box { background: var(--inset); color: var(--inset-ink); border-radius: 16px; padding: 12px 12px 8px; min-width: 0; }
+  .chart-box svg { width: 100%; height: auto; display: block; }
+  .chart-pill {
+    background: var(--pill-bg); color: var(--pill-ink);
+    border-radius: 99px; text-align: center;
+    font-weight: 800; font-size: 0.85rem; padding: 7px 10px; margin-bottom: 10px;
+  }
+  .ch-legend {
+    display: flex; flex-wrap: wrap; gap: 5px 12px;
+    font-size: 0.68rem; color: var(--inset-muted);
+    padding: 0 2px 8px;
+  }
+  .ch-legend .li { display: inline-flex; align-items: center; gap: 5px; }
+  .ch-legend .dot { width: 8px; height: 8px; border-radius: 50%; flex: 0 0 auto; }
+  .trend-caption { font-size: 0.74rem; color: var(--on-blue-soft); margin: 10px 0 2px; }
+  #oTrendHost svg { width: 100%; height: auto; display: block; }
+
+  /* toast */
+  .toast {
+    position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%) translateY(12px);
+    background: var(--inset-ink); color: var(--page);
+    font-size: 0.82rem; font-weight: 600;
+    border-radius: 12px; padding: 10px 18px;
+    opacity: 0; pointer-events: none; transition: opacity 0.2s, transform 0.2s;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    max-width: 90vw;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  @media (prefers-reduced-motion: reduce) {
+    .toast, .nav-main .chev { transition: none; }
+  }
+
+  /* ══ PAGE: ยอดขาย ═══════════════════════════════════════ */
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(320px, 5fr) minmax(420px, 7fr);
+    gap: 22px;
+    align-items: start;
+    max-width: 1240px;
+    margin: 0 auto;
+  }
+  .right-col { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+
+  .hero-label { font-size: 0.95rem; font-weight: 600; color: var(--on-blue-soft); margin: 0 0 6px; }
+  .hero-value { font-size: 2.5rem; font-weight: 800; line-height: 1.1; margin: 0; letter-spacing: 0.01em; }
+  .hero-delta {
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-top: 10px; padding: 4px 12px; border-radius: 99px;
+    font-size: 0.84rem; font-weight: 700;
+    background: rgba(255,255,255,0.14);
+  }
+  .hero-delta .arrow { font-size: 0.8rem; }
+  .hero-delta.up .arrow, .hero-delta.up .pct { color: #8ef0b6; }
+  .hero-delta.down .arrow, .hero-delta.down .pct { color: #ffb3b3; }
+  .hero-delta .vs { color: var(--on-blue-soft); font-weight: 500; }
+
+  .chart-panel {
+    background: var(--inset);
+    border-radius: 16px;
+    margin-top: 20px;
+    padding: 16px 16px 10px;
+    color: var(--inset-ink);
+  }
+  .chart-panel h3 { margin: 0 0 4px; font-size: 0.82rem; font-weight: 700; color: var(--inset-muted); }
+  .chart-panel svg { width: 100%; height: auto; display: block; }
+  .chart-empty { text-align: center; color: var(--inset-muted); font-size: 0.85rem; padding: 46px 0; }
+
+  .filter-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+  .filter-head h2 { margin: 0; font-size: 1rem; font-weight: 700; }
+  .draft-tag {
+    font-size: 0.68rem; font-weight: 700; letter-spacing: 0.04em;
+    background: rgba(255,255,255,0.18); color: var(--on-blue);
+    border-radius: 99px; padding: 3px 10px; white-space: nowrap;
+  }
+  .filter-body {
+    background: var(--inset); color: var(--inset-ink);
+    border-radius: 16px; padding: 16px 18px;
+    display: grid; grid-template-columns: 1fr 190px; gap: 18px;
+  }
+  .filter-rows { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+  .filter-row .row-label {
+    font-size: 0.74rem; font-weight: 700; color: var(--inset-muted);
+    letter-spacing: 0.03em; margin-bottom: 7px;
+  }
+  .checks { display: flex; flex-wrap: wrap; gap: 8px 14px; }
+  .checks label {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 0.86rem; cursor: pointer; user-select: none;
+    padding: 4px 6px; border-radius: 8px;
+  }
+  .checks label:hover { background: var(--accent-soft); }
+  .checks input { accent-color: var(--accent); width: 15px; height: 15px; cursor: pointer; }
+  .cat-dot { width: 10px; height: 10px; border-radius: 3px; flex: 0 0 auto; }
+
+  .ratio-box { border-left: 1px solid var(--hairline); padding-left: 18px; min-width: 0; }
+  .ratio-box .row-label {
+    font-size: 0.74rem; font-weight: 700; color: var(--inset-muted);
+    letter-spacing: 0.03em; margin-bottom: 10px;
+  }
+  .ratio-bar { display: flex; height: 14px; border-radius: 7px; overflow: hidden; gap: 2px; background: var(--grid); }
+  .ratio-bar .seg-a { background: var(--s1); }
+  .ratio-bar .seg-b { background: var(--s4); }
+  .ratio-legend { margin-top: 10px; display: flex; flex-direction: column; gap: 5px; font-size: 0.78rem; }
+  .ratio-legend .li { display: flex; align-items: center; gap: 7px; color: var(--inset-muted); }
+  .ratio-legend .li b { color: var(--inset-ink); margin-left: auto; font-variant-numeric: tabular-nums; }
+
+  .tabs { display: flex; gap: 14px; }
+  .tab-btn {
+    font: inherit; font-weight: 700; font-size: 0.92rem;
+    padding: 11px 26px; border-radius: 14px; cursor: pointer;
+    border: 2px solid var(--accent);
+    background: var(--inset); color: var(--accent);
+    box-shadow: 0 4px 14px rgba(19,72,184,0.10);
+  }
+  .tab-btn.active { background: var(--card-blue); border-color: var(--card-blue); color: #fff; }
+
+  .panel {
+    background: var(--inset); border-radius: 20px;
+    padding: 20px 22px;
+    box-shadow: 0 4px 18px rgba(15,23,42,0.06);
+  }
+
+  .cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .cal-head .cal-title { font-weight: 800; font-size: 1rem; }
+  .cal-nav {
+    background: none; border: 1px solid var(--hairline); border-radius: 10px;
+    width: 32px; height: 32px; cursor: pointer; font-size: 0.95rem;
+    color: var(--inset-muted);
+  }
+  .cal-nav:hover { background: var(--accent-soft); color: var(--accent); }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .cal-grid .dow { text-align: center; font-size: 0.72rem; font-weight: 700; color: var(--inset-muted); padding: 6px 0; }
+  .cal-cell {
+    border: 0; background: none; font: inherit; cursor: pointer;
+    border-radius: 12px; padding: 6px 2px 7px;
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    color: var(--inset-ink);
+  }
+  .cal-cell:hover { background: var(--accent-soft); }
+  .cal-cell .d { font-size: 0.85rem; font-weight: 600; line-height: 1.2; }
+  .cal-cell .amt { font-size: 0.62rem; color: var(--inset-muted); font-variant-numeric: tabular-nums; }
+  .cal-cell.today { box-shadow: inset 0 0 0 2px var(--accent); }
+  .cal-cell.selected { background: var(--card-blue); }
+  .cal-cell.selected .d, .cal-cell.selected .amt { color: #fff; }
+  .cal-cell.blank { visibility: hidden; }
+
+  .month-label { font-size: 0.8rem; font-weight: 700; color: var(--inset-muted); margin-bottom: 10px; }
+  .month-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); gap: 10px; }
+  .month-card {
+    border: 1px solid var(--hairline); background: none; cursor: pointer;
+    font: inherit; border-radius: 14px; padding: 10px 8px 12px;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    color: var(--inset-ink);
+  }
+  .month-card:hover { border-color: var(--accent); background: var(--accent-soft); }
+  .month-card .y { font-size: 0.66rem; color: var(--inset-muted); }
+  .month-card .m { font-size: 0.88rem; font-weight: 700; }
+  .month-card .sum { font-size: 0.7rem; color: var(--good); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .month-card .best {
+    font-size: 0.62rem; font-weight: 700; margin-top: 2px;
+    background: var(--best-bg); color: var(--best-ink);
+    border-radius: 99px; padding: 2px 8px;
+  }
+  .month-card.selected { background: var(--card-blue); border-color: var(--card-blue); }
+  .month-card.selected .y, .month-card.selected .m, .month-card.selected .sum { color: #fff; }
+
+  .tab-btn:focus-visible, .cal-cell:focus-visible, .month-card:focus-visible,
+  .nav-sub button:focus-visible, .nav-main:focus-visible, .cal-nav:focus-visible,
+  .more-link:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 2px;
+  }
+
+  @media (max-width: 980px) {
+    .app { flex-direction: column; }
+    .sidebar { width: auto; flex: none; border-radius: 0 0 22px 22px; flex-direction: row; flex-wrap: wrap; align-items: center; padding: 14px 18px; }
+    .sidebar .brand { padding: 0 14px 0 0; }
+    .layout, .home-layout { grid-template-columns: 1fr; }
+    .filter-body { grid-template-columns: 1fr; }
+    .ratio-box { border-left: 0; padding-left: 0; border-top: 1px solid var(--hairline); padding-top: 14px; }
+    .stat-row { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">Dashboard</div>
+    <div class="nav-group">
+      <button class="nav-main active" id="navHome">หน้าหลัก</button>
+    </div>
+    <div class="nav-group open" id="navSales">
+      <button class="nav-main" id="navSalesBtn" aria-expanded="true">
+        ยอดขาย <span class="chev">❯</span>
+      </button>
+      <div class="nav-sub">
+        <button id="navDaily">ยอดขายรายวัน</button>
+        <button id="navMonthly">ยอดขายรายเดือน</button>
+      </div>
+    </div>
+    <div class="nav-group open" id="navOrdersGroup">
+      <button class="nav-main" id="navOrdersBtn" aria-expanded="true">
+        คำสั่งซื้อ <span class="chev">❯</span>
+      </button>
+      <div class="nav-sub">
+        <button id="navOrders">ภาพรวมคำสั่งซื้อ</button>
+        <button id="navOrderList">ออเดอร์ทั้งหมด</button>
+      </div>
+    </div>
+    <div class="nav-group open" id="navProducts">
+      <button class="nav-main" id="navProductsBtn" aria-expanded="true">
+        สินค้า <span class="chev">❯</span>
+      </button>
+      <div class="nav-sub">
+        <button id="navViews">อันดับสินค้า</button>
+        <button id="navStock">สินค้าใกล้หมด</button>
+      </div>
+    </div>
+    <div class="nav-group">
+      <button class="nav-main soon" disabled>ลูกค้า <span class="tag">เร็วๆ นี้</span></button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <h1 id="pageTitle">หน้าหลัก</h1>
+
+    <!-- ══ PAGE: หน้าหลัก ══ -->
+    <div class="home-layout" id="pageHome">
+      <div class="home-col">
+        <div class="stat-row">
+          <section class="card-blue stat-card">
+            <p class="s-label">ยอดขายของวันนี้</p>
+            <p class="s-value" id="hSalesVal">฿0</p>
+            <span class="s-delta" id="hSalesDelta"><span class="num"></span><span class="vs">เทียบเมื่อวาน</span></span>
+            <button class="more-link" id="hSalesMore">เพิ่มเติม ›</button>
+          </section>
+          <section class="card-blue stat-card">
+            <p class="s-label">คำสั่งซื้อวันนี้</p>
+            <p class="s-value" id="hOrderVal">0</p>
+            <span class="s-delta" id="hOrderDelta"><span class="num"></span><span class="vs">เทียบเมื่อวาน</span></span>
+            <button class="more-link" id="hOrderMore">เพิ่มเติม ›</button>
+          </section>
+          <section class="card-blue stat-card">
+            <p class="s-label">สินค้าที่มีผู้ชมมากที่สุด</p>
+            <p class="s-value" id="hViewVal">0</p>
+            <p class="s-sub" id="hViewProd">—</p>
+            <button class="more-link" id="hViewMore">เพิ่มเติม ›</button>
+          </section>
+        </div>
+
+        <section class="card-orange">
+          <div class="card-head">
+            <h2>Order ทั้งหมด</h2>
+            <button class="more-link" id="orderMore">เพิ่มเติม ›</button>
+          </div>
+          <div class="chip-row" id="chipRow"></div>
+          <div class="ship-grid">
+            <div class="ship-box">
+              <h3>ส่งด่วน <span class="hint">ใกล้เดดไลน์ที่สุด</span></h3>
+              <div class="ship-rows" id="shipExpress"></div>
+            </div>
+            <div class="ship-box">
+              <h3>ส่งปกติ <span class="hint">ใกล้เดดไลน์ที่สุด</span></h3>
+              <div class="ship-rows" id="shipNormal"></div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="home-col">
+        <section class="card-blue">
+          <div class="card-head">
+            <h2>สินค้าใกล้หมด</h2>
+            <button class="more-link" id="stockMore">เพิ่มเติม ›</button>
+          </div>
+          <div class="stock-grid" id="stockGrid"></div>
+        </section>
+
+        <section class="card-blue">
+          <div class="card-head">
+            <h2>ประเภทสินค้าขายดีวันนี้</h2>
+            <button class="more-link" id="hRankMore">เพิ่มเติม ›</button>
+          </div>
+          <div class="rank-panel" id="rankPanel"></div>
+        </section>
+      </div>
+    </div>
+
+    <!-- ══ PAGE: ยอดขาย ══ -->
+    <div class="layout" id="pageSales" hidden>
+      <button class="back-btn span-all" data-back>‹ กลับหน้าหลัก</button>
+
+      <section class="card-blue">
+        <p class="hero-label" id="heroLabel">ยอดขายของวันนี้</p>
+        <p class="hero-value" id="heroValue">฿0</p>
+        <div class="hero-delta" id="heroDelta" hidden>
+          <span class="arrow" id="deltaArrow">▲</span>
+          <span class="pct" id="deltaPct">+0%</span>
+          <span class="vs" id="deltaVs">เทียบกับเมื่อวาน</span>
+        </div>
+        <div class="chart-panel">
+          <h3 id="chartTitle">ยอดขายตามหมวดหมู่สินค้า</h3>
+          <div id="chartHost"></div>
+        </div>
+      </section>
+
+      <div class="right-col">
+        <section class="card-blue">
+          <div class="filter-head">
+            <h2>ดูอัตราส่วนของตัวชี้วัด</h2>
+            <span class="draft-tag">ฉบับร่าง · ปรับได้ภายหลัง</span>
+          </div>
+          <div class="filter-body">
+            <div class="filter-rows">
+              <div class="filter-row">
+                <div class="row-label">ประเภทสินค้า</div>
+                <div class="checks" id="typeChecks"></div>
+              </div>
+              <div class="filter-row">
+                <div class="row-label">หมวดหมู่สินค้า</div>
+                <div class="checks" id="catChecks"></div>
+              </div>
+            </div>
+            <div class="ratio-box">
+              <div class="row-label">สัดส่วนตามประเภท</div>
+              <div class="ratio-bar" id="ratioBar" role="img" aria-label="สัดส่วนยอดขายตามประเภทสินค้า">
+                <div class="seg-a" style="flex:1"></div>
+                <div class="seg-b" style="flex:1"></div>
+              </div>
+              <div class="ratio-legend" id="ratioLegend"></div>
+            </div>
+          </div>
+        </section>
+
+        <div class="tabs">
+          <button class="tab-btn active" id="tabDaily">ยอดขายรายวัน</button>
+          <button class="tab-btn" id="tabMonthly">ยอดขายรายเดือน</button>
+        </div>
+
+        <section class="panel" id="panelDaily">
+          <div class="cal-head">
+            <button class="cal-nav" id="calPrev" aria-label="เดือนก่อนหน้า">‹</button>
+            <div class="cal-title" id="calTitle"></div>
+            <button class="cal-nav" id="calNext" aria-label="เดือนถัดไป">›</button>
+          </div>
+          <div class="cal-grid" id="calGrid"></div>
+        </section>
+
+        <section class="panel" id="panelMonthly" hidden>
+          <div class="month-label">เลือกเดือนเพื่อดูยอดขายรวมของเดือนนั้น</div>
+          <div class="month-grid" id="monthGrid"></div>
+        </section>
+      </div>
+    </div>
+
+    <!-- ══ PAGE: คำสั่งซื้อ ══ -->
+    <div class="layout" id="pageOrders" hidden>
+      <button class="back-btn span-all" data-back>‹ กลับหน้าหลัก</button>
+
+      <section class="card-blue">
+        <p class="hero-label" id="oHeroLabel">ยอดคำสั่งซื้อของวันนี้</p>
+        <p class="hero-value" id="oHeroValue">0</p>
+        <div class="hero-delta" id="oHeroDelta" hidden>
+          <span class="arrow" id="oDeltaArrow">▲</span>
+          <span class="pct" id="oDeltaPct">+0%</span>
+          <span class="vs" id="oDeltaVs">เทียบกับเมื่อวาน</span>
+        </div>
+        <div class="chart-panel">
+          <h3 id="oChartTitle">คำสั่งซื้อตามหมวดหมู่สินค้า</h3>
+          <div id="oChartHost"></div>
+        </div>
+      </section>
+
+      <div class="right-col">
+        <section class="card-blue">
+          <div class="filter-head">
+            <h2>ดูแนวโน้มคำสั่งซื้อ</h2>
+            <span class="draft-tag">ฉบับร่าง · ปรับได้ภายหลัง</span>
+          </div>
+          <div class="trend-controls">
+            <input id="oSearch" list="productCodes" placeholder="ค้นหารหัสสินค้า เช่น CH-0089"
+                   aria-label="ค้นหารหัสสินค้า">
+            <datalist id="productCodes"></datalist>
+            <select id="oCatSel" aria-label="เลือกหมวดหมู่สินค้า"></select>
+            <select id="oGranSel" aria-label="เลือกช่วงเวลา">
+              <option value="day">รายวัน</option>
+              <option value="month">รายเดือน</option>
+              <option value="year">รายปี</option>
+            </select>
+          </div>
+          <p class="trend-caption" id="oCaption"></p>
+          <div id="oTrendHost"></div>
+        </section>
+
+        <div class="tabs">
+          <button class="tab-btn active" id="oTabDaily">คำสั่งซื้อรายวัน</button>
+          <button class="tab-btn" id="oTabMonthly">คำสั่งซื้อรายเดือน</button>
+        </div>
+
+        <section class="panel" id="oPanelDaily">
+          <div class="cal-head">
+            <button class="cal-nav" id="oCalPrev" aria-label="เดือนก่อนหน้า">‹</button>
+            <div class="cal-title" id="oCalTitle"></div>
+            <button class="cal-nav" id="oCalNext" aria-label="เดือนถัดไป">›</button>
+          </div>
+          <div class="cal-grid" id="oCalGrid"></div>
+        </section>
+
+        <section class="panel" id="oPanelMonthly" hidden>
+          <div class="month-label">เลือกเดือนเพื่อดูจำนวนคำสั่งซื้อรวมของเดือนนั้น</div>
+          <div class="month-grid" id="oMonthGrid"></div>
+        </section>
+      </div>
+    </div>
+
+    <!-- ══ PAGE: ออเดอร์ทั้งหมด (ตาราง 4 สถานะ) ══ -->
+    <div class="wide-layout" id="pageOrderList" hidden>
+      <button class="back-btn" data-back>‹ กลับหน้าหลัก</button>
+      <section class="card-blue">
+        <div class="ot-grid">
+          <div class="ot-card">
+            <div class="ot-title">ที่ต้องจัดส่ง</div>
+            <div class="table-panel">
+              <table class="data-table">
+                <thead><tr><th>รายการสินค้า</th><th>ที่อยู่ปลายทาง</th><th>วันที่ต้องส่งถึง</th><th>สถานะ</th></tr></thead>
+                <tbody id="otTodo"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="ot-card">
+            <div class="ot-title">เตรียมจัดส่ง</div>
+            <div class="table-panel">
+              <table class="data-table">
+                <thead><tr><th>รายการสินค้า</th><th>ที่อยู่ปลายทาง</th><th>วันที่ต้องส่งถึง</th><th>สถานะ</th></tr></thead>
+                <tbody id="otPrep"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="ot-card">
+            <div class="ot-title">กำลังจัดส่ง</div>
+            <div class="table-panel">
+              <table class="data-table">
+                <thead><tr><th>รายการสินค้า</th><th>เดดไลน์ที่ต้องถึง</th><th>ที่อยู่ปลายทาง</th><th>ชื่อขนส่ง</th></tr></thead>
+                <tbody id="otShip"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="ot-card">
+            <div class="ot-title">จัดส่งแล้ว</div>
+            <div class="table-panel">
+              <table class="data-table">
+                <thead><tr><th>รายการสินค้า</th><th>วันที่ถึง</th><th>รีวิว</th><th>ยอดขาย</th></tr></thead>
+                <tbody id="otDone"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ══ PAGE: สินค้า (อันดับตาม click rate) ══ -->
+    <div class="sub-layout" id="pageViews" hidden>
+      <button class="back-btn" data-back>‹ กลับหน้าหลัก</button>
+      <section class="card-blue">
+        <div class="filter-head">
+          <h2>อันดับสินค้าตาม Click rate</h2>
+          <span class="draft-tag">ฉบับร่าง · ปรับได้ภายหลัง</span>
+        </div>
+        <div class="trend-controls">
+          <select id="pCatSel" aria-label="เลือกประเภทสินค้า"></select>
+          <select id="pGranSel" aria-label="เลือกช่วงเวลา">
+            <option value="day">ดูเป็นรายวัน (วันนี้)</option>
+            <option value="month">ดูเป็นรายเดือน (เดือนนี้)</option>
+            <option value="year">ดูเป็นรายปี (ปีนี้)</option>
+          </select>
+          <button class="search-btn" id="pSearchBtn">ค้นหา</button>
+        </div>
+        <p class="trend-caption" id="pCaption"></p>
+        <div class="table-panel">
+          <table class="data-table">
+            <thead><tr>
+              <th>อันดับ</th><th>รหัสสินค้า</th><th>Click rate</th><th>ยอดคำสั่งซื้อ</th>
+              <th>ช่องทางที่ลูกค้าเข้ามามากที่สุด</th><th></th>
+            </tr></thead>
+            <tbody id="pTbody"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <!-- ══ PAGE: ข้อมูลเชิงลึกสินค้า ══ -->
+    <div class="sub-layout" id="pageDetail" hidden>
+      <button class="back-btn" id="dBack">‹ กลับหน้าอันดับสินค้า</button>
+      <section class="card-blue">
+        <div class="filter-head">
+          <h2>ข้อมูลเชิงลึกสินค้า</h2>
+          <span class="draft-tag">ฉบับร่าง · ปรับได้ภายหลัง</span>
+        </div>
+        <div class="trend-controls">
+          <select id="dCatSel" aria-label="เลือกประเภทสินค้า"></select>
+          <select id="dGranSel" aria-label="เลือกช่วงเวลา">
+            <option value="day">รายวัน (วันนี้ รายชั่วโมง)</option>
+            <option value="month">รายเดือน (เดือนนี้ รายวัน)</option>
+            <option value="year">รายปี (ปีนี้ รายเดือน)</option>
+          </select>
+          <button class="search-btn" id="dSearchBtn">ค้นหา</button>
+        </div>
+        <div class="trend-controls">
+          <input id="dSearch" list="productCodes" aria-label="พิมพ์ชื่อหรือรหัสสินค้า"
+                 placeholder="พิมพ์หารหัสสินค้า เช่น SF-0142 หรือพิมพ์ชื่อ เช่น โซฟา แล้วกดค้นหา">
+        </div>
+        <p class="trend-caption" id="dCaption"></p>
+        <div class="detail-charts">
+          <div class="chart-box">
+            <div class="chart-pill">Click rate</div>
+            <div id="dClicksChart"></div>
+          </div>
+          <div class="chart-box">
+            <div class="chart-pill">ยอดคำสั่งซื้อ</div>
+            <div id="dOrdersChart"></div>
+          </div>
+          <div class="chart-box">
+            <div class="chart-pill">ช่องทางเข้าชม</div>
+            <div class="ch-legend" id="dChLegend"></div>
+            <div id="dChChart"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ══ PAGE: สินค้าใกล้หมด ══ -->
+    <div class="sub-layout" id="pageStock" hidden>
+      <button class="back-btn" data-back>‹ กลับหน้าหลัก</button>
+      <section class="card-blue">
+        <div class="card-head">
+          <h2>สต๊อกสินค้าคงเหลือ</h2>
+          <span class="draft-tag">ฉบับร่าง · ปรับได้ภายหลัง</span>
+        </div>
+        <div class="table-panel">
+          <table class="data-table">
+            <thead><tr><th>รหัส</th><th>ชื่อสินค้า</th><th>คงเหลือ</th><th>สถานะ</th></tr></thead>
+            <tbody id="stockTbody"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(() => {
+  /* ── mock data (deterministic, seeded) ─────────────────────────── */
+  const CATS = [
+    { id: 'sofa',    name: 'โซฟา',    base: 4200, color: 'var(--s1)' },
+    { id: 'chair',   name: 'เก้าอี้',  base: 2600, color: 'var(--s2)' },
+    { id: 'table',   name: 'โต๊ะ',     base: 3100, color: 'var(--s3)' },
+    { id: 'cabinet', name: 'ตู้',      base: 1900, color: 'var(--s4)' },
+  ];
+  const TYPES = [
+    { id: 'normal', name: 'สินค้าธรรมดา', factor: 1.0 },
+    { id: 'sale',   name: 'สินค้าลดราคา', factor: 0.45 },
+  ];
+  const PRODUCTS = [
+    { code: 'SF-0142', name: 'โซฟาผ้า 3 ที่นั่ง',     cat: 'sofa' },
+    { code: 'SF-0217', name: 'โซฟาหนังเข้ามุม',       cat: 'sofa' },
+    { code: 'CH-0089', name: 'เก้าอี้ทำงานเพื่อสุขภาพ', cat: 'chair' },
+    { code: 'CH-0154', name: 'เก้าอี้ไม้โอ๊ค',         cat: 'chair' },
+    { code: 'TB-0063', name: 'โต๊ะกลางท็อปหินอ่อน',    cat: 'table' },
+    { code: 'TB-0121', name: 'โต๊ะทำงานไม้สัก',        cat: 'table' },
+    { code: 'CB-0037', name: 'ตู้เสื้อผ้าบานเลื่อน',    cat: 'cabinet' },
+    { code: 'CB-0075', name: 'ตู้หนังสือ 5 ชั้น',       cat: 'cabinet' },
+  ];
+  const MONTHS = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
+                  'กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+  const MONTHS_S = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  const DOWS = ['อา.','จ.','อ.','พ.','พฤ.','ศ.','ส.'];
+
+  function hash(str) {
+    let h = 2166136261;
+    for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+    return h >>> 0;
+  }
+  function rand01(str) {
+    let t = hash(str) + 0x6D2B79F5;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  }
+  const seasonal = m => 1 + 0.28 * Math.sin((m - 2) / 12 * 2 * Math.PI);
+  function salesFor(y, m, d, catId, typeId) {
+    const cat = CATS.find(c => c.id === catId);
+    const typ = TYPES.find(t => t.id === typeId);
+    const dow = new Date(y, m, d).getDay();
+    const weekend = (dow === 0 || dow === 6) ? 1.35 : 1;
+    const noise = 0.6 + 0.8 * rand01(`${y}-${m}-${d}|${catId}|${typeId}`);
+    return Math.round(cat.base * typ.factor * seasonal(m) * weekend * noise);
+  }
+
+  /* ── state ─────────────────────────────────────────────────────── */
+  const today = new Date();
+  const state = {
+    page: 'home',                             // 'home' | 'sales'
+    mode: 'day',                              // 'day' | 'month'
+    selY: today.getFullYear(), selM: today.getMonth(), selD: today.getDate(),
+    calY: today.getFullYear(), calM: today.getMonth(),
+    cats: new Set(CATS.map(c => c.id)),
+    types: new Set(TYPES.map(t => t.id)),
+    /* หน้าคำสั่งซื้อ */
+    oMode: 'day',
+    oSelY: today.getFullYear(), oSelM: today.getMonth(), oSelD: today.getDate(),
+    oCalY: today.getFullYear(), oCalM: today.getMonth(),
+    oCat: 'all', oCode: '', oGran: 'day',
+    /* หน้าสินค้า (อันดับ click rate) */
+    pCat: 'all', pGran: 'day',
+    /* หน้าเชิงลึกสินค้า */
+    dCode: '', dCat: 'all', dGran: 'day', dNotFound: '',
+  };
+
+  /* ── aggregation ───────────────────────────────────────────────── */
+  const activeCats = () => CATS.filter(c => state.cats.has(c.id));
+  const activeTypes = () => TYPES.filter(t => state.types.has(t.id));
+
+  function dayCat(y, m, d, catId) {
+    let s = 0;
+    for (const t of activeTypes()) s += salesFor(y, m, d, catId, t.id);
+    return s;
+  }
+  function dayTotal(y, m, d) {
+    let s = 0;
+    for (const c of activeCats()) s += dayCat(y, m, d, c.id);
+    return s;
+  }
+  /* unfiltered versions — the home page always shows the whole store */
+  function dayCatAll(y, m, d, catId) {
+    let s = 0;
+    for (const t of TYPES) s += salesFor(y, m, d, catId, t.id);
+    return s;
+  }
+  function dayTotalAll(y, m, d) {
+    let s = 0;
+    for (const c of CATS) s += dayCatAll(y, m, d, c.id);
+    return s;
+  }
+  function monthCat(y, m, catId) {
+    const n = new Date(y, m + 1, 0).getDate();
+    let s = 0;
+    for (let d = 1; d <= n; d++) s += dayCat(y, m, d, catId);
+    return s;
+  }
+  function monthTotal(y, m) {
+    let s = 0;
+    for (const c of activeCats()) s += monthCat(y, m, c.id);
+    return s;
+  }
+  function typeTotal(typeId) {
+    let s = 0;
+    if (!state.types.has(typeId)) return 0;
+    for (const c of activeCats()) {
+      if (state.mode === 'day') s += salesFor(state.selY, state.selM, state.selD, c.id, typeId);
+      else {
+        const n = new Date(state.selY, state.selM + 1, 0).getDate();
+        for (let d = 1; d <= n; d++) s += salesFor(state.selY, state.selM, d, c.id, typeId);
+      }
+    }
+    return s;
+  }
+  /* orders are modelled per product per day, so every page sums the same source */
+  function orderFor(y, m, d, code) {
+    const p = PRODUCTS.find(x => x.code === code);
+    const cat = CATS.find(c => c.id === p.cat);
+    const dow = new Date(y, m, d).getDay();
+    const weekend = (dow === 0 || dow === 6) ? 1.3 : 1;
+    const noise = 0.4 + 1.2 * rand01(`od|${y}-${m}-${d}|${code}`);
+    return Math.round((cat.base / 350) * seasonal(m) * weekend * noise);
+  }
+  function orderCount(y, m, d) {
+    return PRODUCTS.reduce((s, p) => s + orderFor(y, m, d, p.code), 0);
+  }
+  function ordersDayCat(y, m, d, catId) {
+    return PRODUCTS.filter(p => p.cat === catId)
+      .reduce((s, p) => s + orderFor(y, m, d, p.code), 0);
+  }
+  function ordersMonthAll(y, m) {
+    const n = new Date(y, m + 1, 0).getDate();
+    let s = 0;
+    for (let d = 1; d <= n; d++) s += orderCount(y, m, d);
+    return s;
+  }
+  function ordersMonthCat(y, m, catId) {
+    const n = new Date(y, m + 1, 0).getDate();
+    let s = 0;
+    for (let d = 1; d <= n; d++) s += ordersDayCat(y, m, d, catId);
+    return s;
+  }
+
+  /* ── formatting ────────────────────────────────────────────────── */
+  const fmtFull = n => '฿' + Math.round(n).toLocaleString('th-TH');
+  const fmtNum = n => Math.round(n).toLocaleString('th-TH');
+  const fmtCompact = n =>
+    n >= 1e6 ? '฿' + (n / 1e6).toFixed(1) + 'M' :
+    n >= 1e3 ? '฿' + (n / 1e3).toFixed(1) + 'K' : '฿' + Math.round(n);
+  const isToday = (y, m, d) =>
+    y === today.getFullYear() && m === today.getMonth() && d === today.getDate();
+  const dkey = () => `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
+
+  /* per-product mock metrics (deterministic; clicks are modelled per day
+     so day/month/year views all sum from the same source) */
+  const clicksFor = (y, m, d, code) =>
+    Math.round(300 + 1300 * rand01(`pv|${y}-${m}-${d}|${code}`));
+  function clicksMonth(y, m, code) {
+    const n = new Date(y, m + 1, 0).getDate();
+    let s = 0;
+    for (let d = 1; d <= n; d++) s += clicksFor(y, m, d, code);
+    return s;
+  }
+  function clicksYear(y, code) {
+    let s = 0;
+    for (let m = 0; m < 12; m++) s += clicksMonth(y, m, code);
+    return s;
+  }
+  const productViews = code =>
+    clicksFor(today.getFullYear(), today.getMonth(), today.getDate(), code);
+  const stockLeft = code => 2 + Math.round(26 * rand01('left|' + code + '|' + dkey()));
+
+  /* referral channels — order = legend/color order (validated palette order) */
+  const CHANNELS = [
+    { name: 'TikTok',    w: 1.30, color: 'var(--ch1)' },
+    { name: 'Google',    w: 0.90, color: 'var(--ch2)' },
+    { name: 'Instagram', w: 1.00, color: 'var(--ch3)' },
+    { name: 'LINE',      w: 0.80, color: 'var(--ch4)' },
+    { name: 'Facebook',  w: 1.25, color: 'var(--ch5)' },
+  ];
+  function topChannel(code, periodKey) {
+    let best = CHANNELS[0].name, bv = -1;
+    for (const c of CHANNELS) {
+      const v = c.w * rand01(`ch|${periodKey}|${code}|${c.name}`);
+      if (v > bv) { bv = v; best = c.name; }
+    }
+    return best;
+  }
+
+  /* ── product icons (drawn SVG — swap for real photos later) ────── */
+  const ICONS = {
+    sofa: `<svg viewBox="0 0 64 48" aria-hidden="true"><rect x="10" y="8" width="44" height="18" rx="6" fill="var(--s1)" opacity="0.55"/><rect x="4" y="18" width="12" height="18" rx="5" fill="var(--s1)"/><rect x="48" y="18" width="12" height="18" rx="5" fill="var(--s1)"/><rect x="10" y="24" width="44" height="12" rx="4" fill="var(--s1)" opacity="0.8"/><rect x="10" y="38" width="5" height="6" rx="2" fill="var(--s1)"/><rect x="49" y="38" width="5" height="6" rx="2" fill="var(--s1)"/></svg>`,
+    chair: `<svg viewBox="0 0 64 48" aria-hidden="true"><rect x="24" y="2" width="16" height="20" rx="5" fill="var(--s2)" opacity="0.7"/><rect x="18" y="24" width="28" height="8" rx="3" fill="var(--s2)"/><rect x="20" y="33" width="4" height="13" rx="2" fill="var(--s2)" opacity="0.85"/><rect x="40" y="33" width="4" height="13" rx="2" fill="var(--s2)" opacity="0.85"/><rect x="30" y="33" width="4" height="9" rx="2" fill="var(--s2)" opacity="0.55"/></svg>`,
+    table: `<svg viewBox="0 0 64 48" aria-hidden="true"><rect x="6" y="12" width="52" height="7" rx="3" fill="var(--s3)"/><rect x="11" y="20" width="6" height="24" rx="2.5" fill="var(--s3)" opacity="0.8"/><rect x="47" y="20" width="6" height="24" rx="2.5" fill="var(--s3)" opacity="0.8"/><rect x="17" y="24" width="30" height="4" rx="2" fill="var(--s3)" opacity="0.45"/></svg>`,
+    cabinet: `<svg viewBox="0 0 64 48" aria-hidden="true"><rect x="16" y="3" width="32" height="40" rx="4" fill="var(--s4)" opacity="0.75"/><line x1="32" y1="5" x2="32" y2="41" stroke="var(--inset)" stroke-width="2"/><rect x="26" y="19" width="3" height="9" rx="1.5" fill="var(--inset)"/><rect x="35" y="19" width="3" height="9" rx="1.5" fill="var(--inset)"/><rect x="18" y="43" width="5" height="4" rx="1.5" fill="var(--s4)"/><rect x="41" y="43" width="5" height="4" rx="1.5" fill="var(--s4)"/></svg>`,
+  };
+
+  /* ── toast ─────────────────────────────────────────────────────── */
+  let toastTimer;
+  function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
+  }
+
+  /* ══ PAGE: หน้าหลัก ═════════════════════════════════════════════ */
+  function deltaHtml(cur, prev) {
+    if (!(prev > 0)) return '';
+    const pct = (cur - prev) / prev * 100;
+    const up = pct >= 0;
+    return { up, text: (up ? '▲ +' : '▼ ') + pct.toFixed(1) + '%' };
+  }
+  function setDelta(id, cur, prev) {
+    const el = document.getElementById(id);
+    const d = deltaHtml(cur, prev);
+    if (!d) { el.hidden = true; return; }
+    el.classList.toggle('up', d.up);
+    el.classList.toggle('down', !d.up);
+    el.querySelector('.num').textContent = d.text;
+  }
+
+  function renderHomeStats() {
+    const y = today.getFullYear(), m = today.getMonth(), d = today.getDate();
+    const pd = new Date(y, m, d - 1);
+
+    const sToday = dayTotalAll(y, m, d);
+    const sPrev = dayTotalAll(pd.getFullYear(), pd.getMonth(), pd.getDate());
+    document.getElementById('hSalesVal').textContent = fmtFull(sToday);
+    setDelta('hSalesDelta', sToday, sPrev);
+
+    const oToday = orderCount(y, m, d);
+    const oPrev = orderCount(pd.getFullYear(), pd.getMonth(), pd.getDate());
+    document.getElementById('hOrderVal').textContent = fmtNum(oToday) + ' รายการ';
+    setDelta('hOrderDelta', oToday, oPrev);
+
+    const prod = PRODUCTS.reduce((a, b) => productViews(b.code) > productViews(a.code) ? b : a, PRODUCTS[0]);
+    const views = productViews(prod.code);
+    document.getElementById('hViewVal').textContent = fmtNum(views) + ' ครั้ง';
+    document.getElementById('hViewProd').textContent = `${prod.code} · ${prod.name}`;
+  }
+
+  /* pick n distinct products deterministically (step 3 is coprime with the
+     list length, so the scan hits every product without ever looping) */
+  function pickProducts(seed, n) {
+    const start = hash(seed + '|' + dkey()) % PRODUCTS.length;
+    const out = [];
+    for (let k = 0; out.length < n && k < PRODUCTS.length; k++) {
+      const p = PRODUCTS[(start + k * 3) % PRODUCTS.length];
+      if (!out.includes(p)) out.push(p);
+    }
+    return out;
+  }
+
+  function renderLowStock() {
+    const grid = document.getElementById('stockGrid');
+    const picks = [...PRODUCTS].sort((a, b) => stockLeft(a.code) - stockLeft(b.code)).slice(0, 3);
+    grid.innerHTML = picks.map(p => {
+      const left = stockLeft(p.code);
+      return `<div class="stock-tile">
+        <div class="pic">${ICONS[p.cat]}</div>
+        <span class="nm">${p.name}</span>
+        <span class="cd">${p.code}</span>
+        <span class="left">เหลือ ${left} ชิ้น</span>
+      </div>`;
+    }).join('');
+  }
+
+  const STATUSES = [
+    { label: 'ต้องจัดส่ง',  share: 0.22, pill: 'st-todo', chip: 'chip-todo' },
+    { label: 'เตรียมจัดส่ง', share: 0.18, pill: 'st-prep', chip: 'chip-prep' },
+    { label: 'กำลังจัดส่ง',  share: 0.26, pill: 'st-ship', chip: 'chip-ship' },
+    { label: 'จัดส่งแล้ว',   share: 0.34, pill: 'st-done', chip: 'chip-done' },
+  ];
+  const statusChipsHtml = total => STATUSES.map((s, i) => {
+    const n = Math.max(0, Math.round(total * s.share * (0.8 + 0.4 * rand01('st|' + i + '|' + dkey()))));
+    return `<div class="order-chip ${s.chip}"><div class="c-label">${s.label}</div><div class="c-num">${n}</div></div>`;
+  }).join('');
+
+  /* ขั้นตอนของสินค้าที่ยังไม่ได้จัดส่งเสร็จ (ไฮไลต์ในรายการส่งด่วน/ส่งปกติ) */
+  const SHIP_STAGES = [
+    { cls: 'stage-todo', tag: 'st-todo', label: 'ต้องจัดส่ง' },
+    { cls: 'stage-prep', tag: 'st-prep', label: 'เตรียมจัดส่ง' },
+    { cls: 'stage-ship', tag: 'st-ship', label: 'กำลังจัดส่ง' },
+  ];
+  const shipStage = code => SHIP_STAGES[hash('stg|' + code + '|' + dkey()) % SHIP_STAGES.length];
+
+  function renderOrders() {
+    const y = today.getFullYear(), m = today.getMonth(), d = today.getDate();
+    document.getElementById('chipRow').innerHTML = statusChipsHtml(orderCount(y, m, d));
+
+    const expTimes = ['13:30', '15:00', '16:45'];
+    document.getElementById('shipExpress').innerHTML = pickProducts('express', 3).map((p, i) => {
+      const st = shipStage(p.code);
+      return `<div class="ship-row ${st.cls}">
+        <div class="pid"><b>${p.code}</b><span>${p.name}</span></div>
+        <div class="ship-right">
+          <span class="stage-tag ${st.tag}">${st.label}</span>
+          <span class="dl urgent">วันนี้ ${expTimes[i]}</span>
+        </div>
+      </div>`;
+    }).join('');
+    const nrmDates = ['พรุ่งนี้', `${(d + 2)} ${MONTHS_S[m]}`, `${(d + 3)} ${MONTHS_S[m]}`];
+    document.getElementById('shipNormal').innerHTML = pickProducts('normal', 3).map((p, i) => {
+      const st = shipStage(p.code + '|n');
+      return `<div class="ship-row ${st.cls}">
+        <div class="pid"><b>${p.code}</b><span>${p.name}</span></div>
+        <div class="ship-right">
+          <span class="stage-tag ${st.tag}">${st.label}</span>
+          <span class="dl calm">${nrmDates[i]}</span>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  /* generic horizontal ranked bar chart (single hue, direct value labels) */
+  function hBarChart(rows, fmtVal, ariaLabel) {
+    const max = rows[0].v * 1.12 || 1;
+    const W = 440, rowH = 40, padT = 6, padB = 24, padL = 72, padR = 66;
+    const H = padT + rowH * rows.length + padB;
+    const plotW = W - padL - padR;
+
+    let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${ariaLabel}">`;
+    for (let g = 1; g <= 4; g++) {
+      const gx = padL + plotW * (g / 4);
+      s += `<line x1="${gx}" y1="${padT}" x2="${gx}" y2="${H - padB}" stroke="var(--grid)" stroke-width="1"/>`;
+      s += `<text x="${gx}" y="${H - padB + 15}" text-anchor="middle" font-size="10" fill="var(--inset-muted)">${fmtVal(max * g / 4)}</text>`;
+    }
+    s += `<line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H - padB}" stroke="var(--hairline)" stroke-width="1.5"/>`;
+    rows.forEach((r, i) => {
+      const bw = Math.max(2, plotW * (r.v / max));
+      const yPos = padT + rowH * i + (rowH - 22) / 2;
+      const rr = Math.min(4, bw / 2);
+      s += `<text x="${padL - 8}" y="${yPos + 15}" text-anchor="end" font-size="12" fill="var(--inset-ink)">${r.name}</text>`;
+      s += `<path d="M${padL},${yPos} L${padL + bw - rr},${yPos} Q${padL + bw},${yPos} ${padL + bw},${yPos + rr} L${padL + bw},${yPos + 22 - rr} Q${padL + bw},${yPos + 22} ${padL + bw - rr},${yPos + 22} L${padL},${yPos + 22} Z" fill="var(--s1)"/>`;
+      s += `<text x="${padL + bw + 7}" y="${yPos + 15}" font-size="11" font-weight="700" fill="var(--inset-ink)">${fmtVal(r.v)}</text>`;
+    });
+    return s + '</svg>';
+  }
+
+  function renderRank() {
+    const y = today.getFullYear(), m = today.getMonth(), d = today.getDate();
+    const rows = CATS
+      .map(c => ({ name: c.name, v: dayCatAll(y, m, d, c.id) }))
+      .sort((a, b) => b.v - a.v);
+    document.getElementById('rankPanel').innerHTML =
+      hBarChart(rows, fmtCompact, 'อันดับประเภทสินค้าขายดีวันนี้');
+  }
+
+  function renderHome() {
+    renderHomeStats(); renderLowStock(); renderOrders(); renderRank();
+  }
+
+  /* ══ PAGE: คำสั่งซื้อ ══════════════════════════════════════════ */
+
+  /* vertical category bar chart (same anatomy as the sales chart) */
+  function vBarChart(rows, fmtVal, ariaLabel) {
+    const max = Math.max(...rows.map(r => r.v)) * 1.18 || 1;
+    const W = 460, H = 250, padL = 8, padR = 8, padT = 26, padB = 30;
+    const plotW = W - padL - padR, plotH = H - padT - padB;
+    const slot = plotW / rows.length, barW = Math.min(58, slot * 0.55);
+
+    let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${ariaLabel}">`;
+    for (let g = 1; g <= 4; g++) {
+      const gy = padT + plotH - plotH * (g / 4);
+      s += `<line x1="${padL}" y1="${gy}" x2="${W - padR}" y2="${gy}" stroke="var(--grid)" stroke-width="1"/>`;
+    }
+    s += `<line x1="${padL}" y1="${padT + plotH}" x2="${W - padR}" y2="${padT + plotH}" stroke="var(--hairline)" stroke-width="1.5"/>`;
+    rows.forEach((r, i) => {
+      const bh = Math.max(2, plotH * (r.v / max));
+      const x = padL + slot * i + (slot - barW) / 2;
+      const y = padT + plotH - bh;
+      const rr = Math.min(4, bh / 2);
+      s += `<path d="M${x},${y + bh} L${x},${y + rr} Q${x},${y} ${x + rr},${y} L${x + barW - rr},${y} Q${x + barW},${y} ${x + barW},${y + rr} L${x + barW},${y + bh} Z" fill="${r.color}"/>`;
+      s += `<text x="${x + barW / 2}" y="${y - 7}" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--inset-ink)">${fmtVal(r.v)}</text>`;
+      s += `<text x="${x + barW / 2}" y="${padT + plotH + 19}" text-anchor="middle" font-size="12" fill="var(--inset-muted)">${r.name}</text>`;
+    });
+    return s + '</svg>';
+  }
+
+  function renderOHero() {
+    const label = document.getElementById('oHeroLabel');
+    const value = document.getElementById('oHeroValue');
+    const delta = document.getElementById('oHeroDelta');
+    let cur, prev, vsText;
+
+    if (state.oMode === 'day') {
+      const { oSelY: y, oSelM: m, oSelD: d } = state;
+      label.textContent = isToday(y, m, d)
+        ? 'ยอดคำสั่งซื้อของวันนี้'
+        : `คำสั่งซื้อวันที่ ${d} ${MONTHS_S[m]} ${y}`;
+      cur = orderCount(y, m, d);
+      const pd = new Date(y, m, d - 1);
+      prev = orderCount(pd.getFullYear(), pd.getMonth(), pd.getDate());
+      vsText = isToday(y, m, d) ? 'เทียบกับเมื่อวาน' : 'เทียบกับวันก่อนหน้า';
+    } else {
+      const { oSelY: y, oSelM: m } = state;
+      label.textContent = `คำสั่งซื้อเดือน${MONTHS[m]} ${y}`;
+      cur = ordersMonthAll(y, m);
+      const py = m === 0 ? y - 1 : y, pm = m === 0 ? 11 : m - 1;
+      prev = ordersMonthAll(py, pm);
+      vsText = 'เทียบกับเดือนก่อนหน้า';
+    }
+
+    value.textContent = fmtNum(cur) + ' รายการ';
+    if (prev > 0 && cur > 0) {
+      const pct = (cur - prev) / prev * 100;
+      const up = pct >= 0;
+      delta.hidden = false;
+      delta.classList.toggle('up', up);
+      delta.classList.toggle('down', !up);
+      document.getElementById('oDeltaArrow').textContent = up ? '▲' : '▼';
+      document.getElementById('oDeltaPct').textContent = (up ? '+' : '') + pct.toFixed(1) + '%';
+      document.getElementById('oDeltaVs').textContent = vsText;
+    } else {
+      delta.hidden = true;
+    }
+  }
+
+  function renderOChart() {
+    document.getElementById('oChartTitle').textContent =
+      state.oMode === 'day' ? 'คำสั่งซื้อตามหมวดหมู่สินค้า (รายวัน)' : 'คำสั่งซื้อตามหมวดหมู่สินค้า (รายเดือน)';
+    const rows = CATS.map(c => ({
+      name: c.name, color: c.color,
+      v: state.oMode === 'day'
+        ? ordersDayCat(state.oSelY, state.oSelM, state.oSelD, c.id)
+        : ordersMonthCat(state.oSelY, state.oSelM, c.id),
+    }));
+    document.getElementById('oChartHost').innerHTML =
+      vBarChart(rows, fmtNum, 'กราฟแท่งจำนวนคำสั่งซื้อตามหมวดหมู่');
+  }
+
+  /* ── trend (search + dropdowns → line chart) ── */
+  function scopeProducts() {
+    if (state.oCode) {
+      const p = PRODUCTS.find(x => x.code === state.oCode);
+      if (p) return [p];
+    }
+    if (state.oCat !== 'all') return PRODUCTS.filter(p => p.cat === state.oCat);
+    return PRODUCTS;
+  }
+  const ordersDayScoped = (y, m, d) =>
+    scopeProducts().reduce((s, p) => s + orderFor(y, m, d, p.code), 0);
+  function ordersMonthScoped(y, m) {
+    const n = new Date(y, m + 1, 0).getDate();
+    let s = 0;
+    for (let d = 1; d <= n; d++) s += ordersDayScoped(y, m, d);
+    return s;
+  }
+  function ordersYearScoped(y) {
+    let s = 0;
+    for (let m = 0; m < 12; m++) s += ordersMonthScoped(y, m);
+    return s;
+  }
+
+  function renderTrend() {
+    const pts = [];
+    if (state.oGran === 'day') {
+      for (let i = 13; i >= 0; i--) {
+        const dt = new Date(today.getFullYear(), today.getMonth(), today.getDate() - i);
+        pts.push({
+          label: `${dt.getDate()} ${MONTHS_S[dt.getMonth()]}`,
+          v: ordersDayScoped(dt.getFullYear(), dt.getMonth(), dt.getDate()),
+        });
+      }
+    } else if (state.oGran === 'month') {
+      for (let i = 11; i >= 0; i--) {
+        const mm = today.getMonth() - i;
+        const y = today.getFullYear() + Math.floor(mm / 12);
+        const m = ((mm % 12) + 12) % 12;
+        pts.push({ label: MONTHS_S[m], v: ordersMonthScoped(y, m) });
+      }
+    } else {
+      for (let i = 4; i >= 0; i--) {
+        const y = today.getFullYear() - i;
+        pts.push({ label: String(y), v: ordersYearScoped(y) });
+      }
+    }
+
+    /* caption: what exactly is being shown */
+    const input = document.getElementById('oSearch').value.trim().toUpperCase();
+    const prod = state.oCode ? PRODUCTS.find(x => x.code === state.oCode) : null;
+    const scopeName = prod ? `${prod.code} · ${prod.name}`
+      : state.oCat !== 'all' ? 'หมวด' + CATS.find(c => c.id === state.oCat).name
+      : 'สินค้าทั้งหมด';
+    const granName = { day: 'รายวัน · 14 วันล่าสุด', month: 'รายเดือน · 12 เดือนล่าสุด', year: 'รายปี · 5 ปีล่าสุด' }[state.oGran];
+    document.getElementById('oCaption').textContent =
+      (input && !prod ? `ไม่พบรหัส "${input}" — ` : '') + `กำลังแสดง: ${scopeName} · ${granName}`;
+
+    /* line chart, white on the blue card */
+    const W = 520, H = 210, padL = 38, padR = 16, padT = 14, padB = 26;
+    const plotW = W - padL - padR, plotH = H - padT - padB;
+    const max = Math.max(...pts.map(p => p.v)) * 1.15 || 1;
+    const n = pts.length;
+    const px = i => padL + (n === 1 ? plotW / 2 : plotW * i / (n - 1));
+    const py = v => padT + plotH - plotH * (v / max);
+
+    let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="กราฟเส้นแนวโน้มคำสั่งซื้อ ${scopeName} ${granName}">`;
+    for (let g = 1; g <= 3; g++) {
+      const gy = padT + plotH - plotH * (g / 3);
+      s += `<line x1="${padL}" y1="${gy}" x2="${W - padR}" y2="${gy}" stroke="rgba(255,255,255,0.22)" stroke-width="1"/>`;
+      s += `<text x="${padL - 6}" y="${gy + 3.5}" text-anchor="end" font-size="9.5" fill="rgba(255,255,255,0.75)">${fmtNum(max * g / 3)}</text>`;
+    }
+    s += `<line x1="${padL}" y1="${padT + plotH}" x2="${W - padR}" y2="${padT + plotH}" stroke="rgba(255,255,255,0.45)" stroke-width="1.5"/>`;
+    s += `<polyline fill="none" stroke="#ffffff" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" points="${pts.map((p, i) => `${px(i)},${py(p.v)}`).join(' ')}"/>`;
+    const step = Math.ceil(n / 8);
+    pts.forEach((p, i) => {
+      const last = i === n - 1;
+      s += `<circle cx="${px(i)}" cy="${py(p.v)}" r="${last ? 4.5 : 3}" fill="#ffffff" stroke="var(--card-blue)" stroke-width="1.5"/>`;
+      if (last) s += `<text x="${px(i)}" y="${py(p.v) - 10}" text-anchor="end" font-size="11" font-weight="700" fill="#ffffff">${fmtNum(p.v)}</text>`;
+      if (last || (i % step === 0 && n - 1 - i >= step))
+        s += `<text x="${px(i)}" y="${H - 8}" text-anchor="middle" font-size="9.5" fill="rgba(255,255,255,0.75)">${p.label}</text>`;
+    });
+    document.getElementById('oTrendHost').innerHTML = s + '</svg>';
+  }
+
+  /* ── calendar + month cards (order counts) ── */
+  function renderOCalendar() {
+    const { oCalY: y, oCalM: m } = state;
+    document.getElementById('oCalTitle').textContent = `${MONTHS[m]} ${y}`;
+    const grid = document.getElementById('oCalGrid');
+    grid.innerHTML = '';
+    for (const d of DOWS) {
+      const el = document.createElement('div');
+      el.className = 'dow'; el.textContent = d;
+      grid.appendChild(el);
+    }
+    const first = new Date(y, m, 1).getDay();
+    const nDays = new Date(y, m + 1, 0).getDate();
+    for (let i = 0; i < first; i++) {
+      const el = document.createElement('div');
+      el.className = 'cal-cell blank';
+      grid.appendChild(el);
+    }
+    for (let d = 1; d <= nDays; d++) {
+      const btn = document.createElement('button');
+      btn.className = 'cal-cell';
+      if (isToday(y, m, d)) btn.classList.add('today');
+      if (state.oMode === 'day' && state.oSelY === y && state.oSelM === m && state.oSelD === d)
+        btn.classList.add('selected');
+      const amt = orderCount(y, m, d);
+      btn.innerHTML = `<span class="d">${d}</span><span class="amt">${fmtNum(amt)}</span>`;
+      btn.setAttribute('aria-label', `${d} ${MONTHS[m]} ${y} คำสั่งซื้อ ${fmtNum(amt)} รายการ`);
+      btn.addEventListener('click', () => {
+        state.oMode = 'day';
+        state.oSelY = y; state.oSelM = m; state.oSelD = d;
+        renderOrdersPage();
+      });
+      grid.appendChild(btn);
+    }
+  }
+
+  function renderOMonths() {
+    const grid = document.getElementById('oMonthGrid');
+    grid.innerHTML = '';
+    const start = { y: today.getFullYear(), m: today.getMonth() };
+    const items = [];
+    for (let i = 0; i < 12; i++) {
+      const m = (start.m + i) % 12;
+      const y = start.y + Math.floor((start.m + i) / 12);
+      items.push({ y, m, total: ordersMonthAll(y, m) });
+    }
+    const best = items.reduce((a, b) => (b.total > a.total ? b : a), items[0]);
+    for (const it of items) {
+      const btn = document.createElement('button');
+      btn.className = 'month-card';
+      if (state.oMode === 'month' && state.oSelY === it.y && state.oSelM === it.m)
+        btn.classList.add('selected');
+      btn.innerHTML =
+        `<span class="y">${it.y}</span><span class="m">${MONTHS[it.m]}</span>` +
+        `<span class="sum">${fmtNum(it.total)} รายการ</span>` +
+        (it === best && it.total > 0 ? '<span class="best">เดือนที่สั่งซื้อมากที่สุด</span>' : '');
+      btn.addEventListener('click', () => {
+        state.oMode = 'month';
+        state.oSelY = it.y; state.oSelM = it.m;
+        renderOrdersPage();
+      });
+      grid.appendChild(btn);
+    }
+  }
+
+  function renderOrdersPage() {
+    renderOHero(); renderOChart(); renderTrend(); renderOCalendar(); renderOMonths();
+  }
+
+  /* ══ PAGE: ออเดอร์ทั้งหมด (ตาราง 4 สถานะ) ══════════════════════ */
+  const ADDRESSES = [
+    'กรุงเทพฯ · บางรัก', 'เชียงใหม่ · เมือง', 'ชลบุรี · ศรีราชา', 'ขอนแก่น · เมือง',
+    'ภูเก็ต · เมือง', 'นนทบุรี · ปากเกร็ด', 'สงขลา · หาดใหญ่', 'นครราชสีมา · เมือง',
+  ];
+  const CARRIERS = ['Kerry Express', 'Flash Express', 'J&T Express', 'ไปรษณีย์ไทย', 'Ninja Van', 'SPX Express'];
+  const relDate = off => {
+    const dt = new Date(today.getFullYear(), today.getMonth(), today.getDate() + off);
+    return off === 0 ? 'วันนี้' : off === 1 ? 'พรุ่งนี้' : off === -1 ? 'เมื่อวาน'
+      : `${dt.getDate()} ${MONTHS_S[dt.getMonth()]}`;
+  };
+  const starHtml = rating => {
+    let s = '';
+    const full = Math.round(rating);
+    for (let i = 1; i <= 5; i++) s += i <= full ? '★' : '☆';
+    return `<span class="stars">${s}</span> ${rating.toFixed(1)}`;
+  };
+  function makeOrder(seed, i) {
+    const r = k => rand01(`${seed}|${i}|${k}|${dkey()}`);
+    const p = PRODUCTS[Math.floor(r('p') * PRODUCTS.length)];
+    const cat = CATS.find(c => c.id === p.cat);
+    const qty = 1 + Math.floor(r('q') * 3);
+    return {
+      code: p.code, name: p.name, qty,
+      express: r('x') < 0.4,
+      address: ADDRESSES[Math.floor(r('a') * ADDRESSES.length)],
+      carrier: CARRIERS[Math.floor(r('c') * CARRIERS.length)],
+      due: Math.floor(r('d') * 4),
+      arrived: -(1 + Math.floor(r('v') * 6)),
+      rating: Math.round((3.5 + r('rt') * 1.5) * 10) / 10,
+      sales: Math.round(cat.base * qty * (0.8 + r('s') * 0.6)),
+    };
+  }
+  const otRows = (seed, n) => Array.from({ length: n }, (_, i) => makeOrder(seed, i));
+  const prodCell = o => `<b>${o.code}</b><br><span class="goto">${o.name}${o.qty > 1 ? ` × ${o.qty}` : ''}</span>`;
+  const shipTag = o => o.express
+    ? '<span class="stage-tag tag-express">ส่งด่วน</span>'
+    : '<span class="stage-tag tag-normal">ส่งปกติ</span>';
+
+  function renderOrderList() {
+    const pending = seed => otRows(seed, 4).map(o =>
+      `<tr><td>${prodCell(o)}</td><td>${o.address}</td><td class="num">${relDate(o.due)}</td><td>${shipTag(o)}</td></tr>`).join('');
+    document.getElementById('otTodo').innerHTML = pending('ot-todo');
+    document.getElementById('otPrep').innerHTML = pending('ot-prep');
+    document.getElementById('otShip').innerHTML = otRows('ot-ship', 4).map(o =>
+      `<tr><td>${prodCell(o)}</td><td class="num">${relDate(o.due)}</td><td>${o.address}</td><td>${o.carrier}</td></tr>`).join('');
+    document.getElementById('otDone').innerHTML = otRows('ot-done', 4).map(o =>
+      `<tr><td>${prodCell(o)}</td><td class="num">${relDate(o.arrived)}</td><td>${starHtml(o.rating)}</td><td class="num">${fmtFull(o.sales)}</td></tr>`).join('');
+  }
+
+  /* ══ PAGE: สินค้า — อันดับตาม click rate ═══════════════════════ */
+  function renderViewsPage() {
+    document.getElementById('pCatSel').value = state.pCat;
+    document.getElementById('pGranSel').value = state.pGran;
+    const y = today.getFullYear(), m = today.getMonth(), d = today.getDate();
+    const gran = state.pGran;
+    const periodKey =
+      gran === 'day' ? `${y}-${m}-${d}` :
+      gran === 'month' ? `${y}-${m}` : `${y}`;
+    const periodName =
+      gran === 'day' ? `วันนี้ (${d} ${MONTHS_S[m]} ${y})` :
+      gran === 'month' ? `เดือน${MONTHS[m]} ${y}` : `ปี ${y}`;
+
+    const list = (state.pCat === 'all' ? PRODUCTS : PRODUCTS.filter(p => p.cat === state.pCat))
+      .map(p => ({
+        ...p,
+        catName: CATS.find(c => c.id === p.cat).name,
+        clicks: gran === 'day' ? clicksFor(y, m, d, p.code)
+              : gran === 'month' ? clicksMonth(y, m, p.code)
+              : clicksYear(y, p.code),
+        orders: gran === 'day' ? orderFor(y, m, d, p.code)
+              : gran === 'month' ? (() => {
+                  const n = new Date(y, m + 1, 0).getDate();
+                  let s = 0;
+                  for (let dd = 1; dd <= n; dd++) s += orderFor(y, m, dd, p.code);
+                  return s;
+                })()
+              : (() => {
+                  let s = 0;
+                  for (let mm = 0; mm < 12; mm++) {
+                    const n = new Date(y, mm + 1, 0).getDate();
+                    for (let dd = 1; dd <= n; dd++) s += orderFor(y, mm, dd, p.code);
+                  }
+                  return s;
+                })(),
+        channel: topChannel(p.code, periodKey),
+      }))
+      .sort((a, b) => b.clicks - a.clicks);
+
+    document.getElementById('pCaption').textContent =
+      `ผลรวมของ${periodName} · เรียงตาม click rate สูงสุด · กดที่แถวเพื่อดูข้อมูลเชิงลึก`;
+
+    document.getElementById('pTbody').innerHTML = list.map((p, i) => `<tr class="clickable" data-code="${p.code}" tabindex="0" role="button"
+        aria-label="ดูข้อมูลเชิงลึกของ ${p.code}">
+      <td class="num rank">${i + 1}</td>
+      <td><b>${p.code}</b><br><span class="goto">${p.catName} · ${p.name}</span></td>
+      <td class="num">${fmtNum(p.clicks)} ครั้ง</td>
+      <td class="num">${fmtNum(p.orders)} รายการ</td>
+      <td>${p.channel}</td>
+      <td class="goto">ดูเชิงลึก ›</td>
+    </tr>`).join('');
+  }
+
+  /* ══ PAGE: ข้อมูลเชิงลึกสินค้า ═════════════════════════════════ */
+  function detailScopeProducts() {
+    if (state.dCode) {
+      const p = PRODUCTS.find(x => x.code === state.dCode);
+      if (p) return [p];
+    }
+    if (state.dCat !== 'all') return PRODUCTS.filter(p => p.cat === state.dCat);
+    return PRODUCTS;
+  }
+  function detailScopeName() {
+    if (state.dCode) {
+      const p = PRODUCTS.find(x => x.code === state.dCode);
+      if (p) return `${p.code} · ${p.name}`;
+    }
+    if (state.dCat !== 'all') return 'หมวด' + CATS.find(c => c.id === state.dCat).name;
+    return 'สินค้าทั้งหมด';
+  }
+
+  /* single-series line chart on a white panel */
+  function lineSvg(pts, fmtVal, ariaLabel) {
+    const W = 320, H = 205, padL = 36, padR = 12, padT = 14, padB = 24;
+    const plotW = W - padL - padR, plotH = H - padT - padB;
+    /* ปัดเพดานแกนขึ้นเป็นจำนวนเต็มที่หาร 3 ลงตัว → ป้ายกริดไม่ซ้ำกัน */
+    const max = Math.max(3, Math.ceil(Math.max(...pts.map(p => p.v)) * 1.15 / 3) * 3);
+    const n = pts.length;
+    const px = i => padL + (n === 1 ? plotW / 2 : plotW * i / (n - 1));
+    const py = v => padT + plotH - plotH * (v / max);
+
+    let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${ariaLabel}">`;
+    for (let g = 1; g <= 3; g++) {
+      const gy = padT + plotH - plotH * (g / 3);
+      s += `<line x1="${padL}" y1="${gy}" x2="${W - padR}" y2="${gy}" stroke="var(--grid)" stroke-width="1"/>`;
+      s += `<text x="${padL - 5}" y="${gy + 3.5}" text-anchor="end" font-size="9" fill="var(--inset-muted)">${fmtVal(max * g / 3)}</text>`;
+    }
+    s += `<line x1="${padL}" y1="${padT + plotH}" x2="${W - padR}" y2="${padT + plotH}" stroke="var(--hairline)" stroke-width="1.5"/>`;
+    s += `<polyline fill="none" stroke="var(--s1)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" points="${pts.map((p, i) => `${px(i)},${py(p.v)}`).join(' ')}"/>`;
+    const step = n <= 8 ? 1 : Math.ceil(n / 6);
+    pts.forEach((p, i) => {
+      const last = i === n - 1;
+      if (last || n <= 12)
+        s += `<circle cx="${px(i)}" cy="${py(p.v)}" r="${last ? 4 : 2.5}" fill="var(--s1)" stroke="var(--inset)" stroke-width="1.5"/>`;
+      if (last) s += `<text x="${px(i)}" y="${py(p.v) - 9}" text-anchor="end" font-size="10.5" font-weight="700" fill="var(--inset-ink)">${fmtVal(p.v)}</text>`;
+      if ((i % step === 0 && n - 1 - i >= step) || last)
+        s += `<text x="${px(i)}" y="${H - 8}" text-anchor="middle" font-size="9" fill="var(--inset-muted)">${p.label}</text>`;
+    });
+    return s + '</svg>';
+  }
+
+  /* multi-series line chart (ช่องทางเข้าชม) — legend rendered in HTML above */
+  function multiLineSvg(labels, series, ariaLabel) {
+    const W = 320, H = 205, padL = 36, padR = 12, padT = 14, padB = 24;
+    const plotW = W - padL - padR, plotH = H - padT - padB;
+    const max = Math.max(3, Math.ceil(Math.max(...series.flatMap(sr => sr.vals)) * 1.15 / 3) * 3);
+    const n = labels.length;
+    const px = i => padL + (n === 1 ? plotW / 2 : plotW * i / (n - 1));
+    const py = v => padT + plotH - plotH * (v / max);
+
+    let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${ariaLabel}">`;
+    for (let g = 1; g <= 3; g++) {
+      const gy = padT + plotH - plotH * (g / 3);
+      s += `<line x1="${padL}" y1="${gy}" x2="${W - padR}" y2="${gy}" stroke="var(--grid)" stroke-width="1"/>`;
+      s += `<text x="${padL - 5}" y="${gy + 3.5}" text-anchor="end" font-size="9" fill="var(--inset-muted)">${fmtNum(max * g / 3)}</text>`;
+    }
+    s += `<line x1="${padL}" y1="${padT + plotH}" x2="${W - padR}" y2="${padT + plotH}" stroke="var(--hairline)" stroke-width="1.5"/>`;
+    for (const sr of series) {
+      s += `<polyline fill="none" stroke="${sr.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" points="${sr.vals.map((v, i) => `${px(i)},${py(v)}`).join(' ')}"/>`;
+      if (n <= 12)
+        sr.vals.forEach((v, i) => {
+          s += `<circle cx="${px(i)}" cy="${py(v)}" r="2.2" fill="${sr.color}" stroke="var(--inset)" stroke-width="1.2"/>`;
+        });
+    }
+    const step = n <= 8 ? 1 : Math.ceil(n / 6);
+    labels.forEach((lb, i) => {
+      const last = i === n - 1;
+      if ((i % step === 0 && n - 1 - i >= step) || last)
+        s += `<text x="${px(i)}" y="${H - 8}" text-anchor="middle" font-size="9" fill="var(--inset-muted)">${lb}</text>`;
+    });
+    return s + '</svg>';
+  }
+
+  function renderDetailPage() {
+    document.getElementById('dCatSel').value = state.dCat;
+    document.getElementById('dGranSel').value = state.dGran;
+    const y = today.getFullYear(), m = today.getMonth(), d = today.getDate();
+    const scope = detailScopeProducts();
+    const scopeKey = state.dCode || state.dCat;
+    const sumClicks = (yy, mm, dd) => scope.reduce((s, p) => s + clicksFor(yy, mm, dd, p.code), 0);
+    const sumOrders = (yy, mm, dd) => scope.reduce((s, p) => s + orderFor(yy, mm, dd, p.code), 0);
+
+    /* buckets: day → hourly (จำลองแบ่งยอดทั้งวันตามช่วงเวลา), month → daily, year → monthly */
+    let labels = [], clicksPts = [], ordersPts = [], bucketKeys = [];
+    if (state.dGran === 'day') {
+      const hours = [3, 6, 9, 12, 15, 18, 21, 24];
+      const shape = [0.45, 0.6, 0.85, 1.1, 1.2, 1.5, 1.65, 1.15];
+      const jitter = hours.map((h, i) => shape[i] * (0.8 + 0.4 * rand01(`hw|${scopeKey}|${i}|${dkey()}`)));
+      const wSum = jitter.reduce((a, b) => a + b, 0);
+      const totC = sumClicks(y, m, d), totO = sumOrders(y, m, d);
+      hours.forEach((h, i) => {
+        labels.push(String(h));
+        clicksPts.push(Math.round(totC * jitter[i] / wSum));
+        ordersPts.push(Math.round(totO * jitter[i] / wSum));
+        bucketKeys.push(`${dkey()}|h${h}`);
+      });
+    } else if (state.dGran === 'month') {
+      const n = new Date(y, m + 1, 0).getDate();
+      for (let dd = 1; dd <= n; dd++) {
+        labels.push(String(dd));
+        clicksPts.push(sumClicks(y, m, dd));
+        ordersPts.push(sumOrders(y, m, dd));
+        bucketKeys.push(`${y}-${m}-${dd}`);
+      }
+    } else {
+      for (let mm = 0; mm < 12; mm++) {
+        labels.push(MONTHS_S[mm]);
+        let c = 0, o = 0;
+        const n = new Date(y, mm + 1, 0).getDate();
+        for (let dd = 1; dd <= n; dd++) { c += sumClicks(y, mm, dd); o += sumOrders(y, mm, dd); }
+        clicksPts.push(c); ordersPts.push(o);
+        bucketKeys.push(`${y}-${mm}`);
+      }
+    }
+
+    /* channel series: split each bucket's clicks by seeded channel shares */
+    const chSeries = CHANNELS.map(c => ({ name: c.name, color: c.color, vals: [] }));
+    bucketKeys.forEach((bk, i) => {
+      const shares = CHANNELS.map(c => c.w * (0.6 + 0.8 * rand01(`chs|${bk}|${scopeKey}|${c.name}`)));
+      const shSum = shares.reduce((a, b) => a + b, 0);
+      CHANNELS.forEach((c, ci) => chSeries[ci].vals.push(Math.round(clicksPts[i] * shares[ci] / shSum)));
+    });
+
+    const granName = {
+      day: `วันนี้ (${d} ${MONTHS_S[m]} ${y}) · รายชั่วโมง`,
+      month: `เดือน${MONTHS[m]} ${y} · รายวัน`,
+      year: `ปี ${y} · รายเดือน`,
+    }[state.dGran];
+    document.getElementById('dCaption').textContent =
+      (state.dNotFound ? `ไม่พบ "${state.dNotFound}" — ` : '') +
+      `กำลังแสดง: ${detailScopeName()} · ${granName}`;
+
+    document.getElementById('dClicksChart').innerHTML =
+      lineSvg(labels.map((lb, i) => ({ label: lb, v: clicksPts[i] })), fmtNum, `Click rate ${detailScopeName()} ${granName}`);
+    document.getElementById('dOrdersChart').innerHTML =
+      lineSvg(labels.map((lb, i) => ({ label: lb, v: ordersPts[i] })), fmtNum, `ยอดคำสั่งซื้อ ${detailScopeName()} ${granName}`);
+    document.getElementById('dChLegend').innerHTML = CHANNELS.map(c =>
+      `<span class="li"><span class="dot" style="background:${c.color}"></span>${c.name}</span>`).join('');
+    document.getElementById('dChChart').innerHTML =
+      multiLineSvg(labels, chSeries, `ช่องทางเข้าชม ${detailScopeName()} ${granName}`);
+  }
+
+  /* ══ PAGE: สินค้าใกล้หมด ══════════════════════════════════════ */
+  function renderStockPage() {
+    const rows = PRODUCTS
+      .map(p => ({ ...p, left: stockLeft(p.code) }))
+      .sort((a, b) => a.left - b.left);
+    document.getElementById('stockTbody').innerHTML = rows.map(p => {
+      const [cls, label] =
+        p.left <= 6 ? ['st-todo', 'ใกล้หมด'] :
+        p.left <= 12 ? ['st-prep', 'เหลือน้อย'] : ['st-done', 'ปกติ'];
+      return `<tr><td class="num"><b>${p.code}</b></td><td>${p.name}</td><td class="num">${p.left} ชิ้น</td><td><span class="st-pill ${cls}">${label}</span></td></tr>`;
+    }).join('');
+  }
+
+  /* ══ PAGE: ยอดขาย ═══════════════════════════════════════════════ */
+  function renderHero() {
+    const label = document.getElementById('heroLabel');
+    const value = document.getElementById('heroValue');
+    const delta = document.getElementById('heroDelta');
+    let cur, prev, vsText;
+
+    if (state.mode === 'day') {
+      const { selY: y, selM: m, selD: d } = state;
+      label.textContent = isToday(y, m, d)
+        ? 'ยอดขายของวันนี้'
+        : `ยอดขายวันที่ ${d} ${MONTHS_S[m]} ${y}`;
+      cur = dayTotal(y, m, d);
+      const pd = new Date(y, m, d - 1);
+      prev = dayTotal(pd.getFullYear(), pd.getMonth(), pd.getDate());
+      vsText = isToday(y, m, d) ? 'เทียบกับเมื่อวาน' : 'เทียบกับวันก่อนหน้า';
+    } else {
+      const { selY: y, selM: m } = state;
+      label.textContent = `ยอดขายเดือน${MONTHS[m]} ${y}`;
+      cur = monthTotal(y, m);
+      const py = m === 0 ? y - 1 : y, pm = m === 0 ? 11 : m - 1;
+      prev = monthTotal(py, pm);
+      vsText = 'เทียบกับเดือนก่อนหน้า';
+    }
+
+    value.textContent = fmtFull(cur);
+    if (prev > 0 && cur > 0) {
+      const pct = (cur - prev) / prev * 100;
+      const up = pct >= 0;
+      delta.hidden = false;
+      delta.classList.toggle('up', up);
+      delta.classList.toggle('down', !up);
+      document.getElementById('deltaArrow').textContent = up ? '▲' : '▼';
+      document.getElementById('deltaPct').textContent = (up ? '+' : '') + pct.toFixed(1) + '%';
+      document.getElementById('deltaVs').textContent = vsText;
+    } else {
+      delta.hidden = true;
+    }
+  }
+
+  function renderChart() {
+    const host = document.getElementById('chartHost');
+    const cats = activeCats();
+    document.getElementById('chartTitle').textContent =
+      state.mode === 'day' ? 'ยอดขายตามหมวดหมู่สินค้า (รายวัน)' : 'ยอดขายตามหมวดหมู่สินค้า (รายเดือน)';
+
+    if (cats.length === 0 || activeTypes().length === 0) {
+      host.innerHTML = '<div class="chart-empty">เลือกหมวดหมู่และประเภทสินค้าอย่างน้อยอย่างละ 1 รายการ</div>';
+      return;
+    }
+
+    const vals = cats.map(c => state.mode === 'day'
+      ? dayCat(state.selY, state.selM, state.selD, c.id)
+      : monthCat(state.selY, state.selM, c.id));
+    const max = Math.max(...vals) * 1.18 || 1;
+
+    const W = 460, H = 250, padL = 8, padR = 8, padT = 26, padB = 30;
+    const plotW = W - padL - padR, plotH = H - padT - padB;
+    const n = cats.length;
+    const slot = plotW / n, barW = Math.min(58, slot * 0.55);
+
+    let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="กราฟแท่งยอดขายตามหมวดหมู่">`;
+    for (let g = 1; g <= 4; g++) {
+      const gy = padT + plotH - plotH * (g / 4);
+      s += `<line x1="${padL}" y1="${gy}" x2="${W - padR}" y2="${gy}" stroke="var(--grid)" stroke-width="1"/>`;
+    }
+    s += `<line x1="${padL}" y1="${padT + plotH}" x2="${W - padR}" y2="${padT + plotH}" stroke="var(--hairline)" stroke-width="1.5"/>`;
+
+    cats.forEach((c, i) => {
+      const v = vals[i];
+      const bh = Math.max(2, plotH * (v / max));
+      const x = padL + slot * i + (slot - barW) / 2;
+      const y = padT + plotH - bh;
+      const r = Math.min(4, bh / 2);
+      s += `<path d="M${x},${y + bh} L${x},${y + r} Q${x},${y} ${x + r},${y} L${x + barW - r},${y} Q${x + barW},${y} ${x + barW},${y + r} L${x + barW},${y + bh} Z" fill="${c.color}"/>`;
+      s += `<text x="${x + barW / 2}" y="${y - 7}" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--inset-ink)">${fmtCompact(v)}</text>`;
+      s += `<text x="${x + barW / 2}" y="${padT + plotH + 19}" text-anchor="middle" font-size="12" fill="var(--inset-muted)">${c.name}</text>`;
+    });
+    s += '</svg>';
+    host.innerHTML = s;
+  }
+
+  function renderRatio() {
+    const a = typeTotal('normal'), b = typeTotal('sale');
+    const total = a + b;
+    const bar = document.getElementById('ratioBar');
+    const legend = document.getElementById('ratioLegend');
+    if (total === 0) {
+      bar.innerHTML = '';
+      legend.innerHTML = '<div class="li">ไม่มีข้อมูลตามตัวกรองที่เลือก</div>';
+      return;
+    }
+    const pa = a / total * 100, pb = b / total * 100;
+    bar.innerHTML =
+      (a > 0 ? `<div class="seg-a" style="flex:${a}"></div>` : '') +
+      (b > 0 ? `<div class="seg-b" style="flex:${b}"></div>` : '');
+    legend.innerHTML =
+      (a > 0 ? `<div class="li"><span class="cat-dot" style="background:var(--s1)"></span>สินค้าธรรมดา <b>${pa.toFixed(0)}%</b></div>` : '') +
+      (b > 0 ? `<div class="li"><span class="cat-dot" style="background:var(--s4)"></span>สินค้าลดราคา <b>${pb.toFixed(0)}%</b></div>` : '');
+  }
+
+  function renderCalendar() {
+    const { calY: y, calM: m } = state;
+    document.getElementById('calTitle').textContent = `${MONTHS[m]} ${y}`;
+    const grid = document.getElementById('calGrid');
+    grid.innerHTML = '';
+    for (const d of DOWS) {
+      const el = document.createElement('div');
+      el.className = 'dow'; el.textContent = d;
+      grid.appendChild(el);
+    }
+    const first = new Date(y, m, 1).getDay();
+    const nDays = new Date(y, m + 1, 0).getDate();
+    for (let i = 0; i < first; i++) {
+      const el = document.createElement('div');
+      el.className = 'cal-cell blank';
+      grid.appendChild(el);
+    }
+    for (let d = 1; d <= nDays; d++) {
+      const btn = document.createElement('button');
+      btn.className = 'cal-cell';
+      if (isToday(y, m, d)) btn.classList.add('today');
+      if (state.mode === 'day' && state.selY === y && state.selM === m && state.selD === d)
+        btn.classList.add('selected');
+      const amt = dayTotal(y, m, d);
+      btn.innerHTML = `<span class="d">${d}</span><span class="amt">${fmtCompact(amt)}</span>`;
+      btn.setAttribute('aria-label', `${d} ${MONTHS[m]} ${y} ยอดขาย ${fmtFull(amt)}`);
+      btn.addEventListener('click', () => {
+        state.mode = 'day';
+        state.selY = y; state.selM = m; state.selD = d;
+        renderSales();
+      });
+      grid.appendChild(btn);
+    }
+  }
+
+  function renderMonths() {
+    const grid = document.getElementById('monthGrid');
+    grid.innerHTML = '';
+    const start = { y: today.getFullYear(), m: today.getMonth() };
+    const items = [];
+    for (let i = 0; i < 12; i++) {
+      const m = (start.m + i) % 12;
+      const y = start.y + Math.floor((start.m + i) / 12);
+      items.push({ y, m, total: monthTotal(y, m) });
+    }
+    const best = items.reduce((a, b) => (b.total > a.total ? b : a), items[0]);
+    for (const it of items) {
+      const btn = document.createElement('button');
+      btn.className = 'month-card';
+      if (state.mode === 'month' && state.selY === it.y && state.selM === it.m)
+        btn.classList.add('selected');
+      btn.innerHTML =
+        `<span class="y">${it.y}</span><span class="m">${MONTHS[it.m]}</span>` +
+        `<span class="sum">ยอดรวม ${fmtCompact(it.total)}</span>` +
+        (it === best && it.total > 0 ? '<span class="best">เดือนที่ขายดีที่สุด</span>' : '');
+      btn.addEventListener('click', () => {
+        state.mode = 'month';
+        state.selY = it.y; state.selM = it.m;
+        renderSales();
+      });
+      grid.appendChild(btn);
+    }
+  }
+
+  function renderSales() {
+    renderHero(); renderChart(); renderRatio(); renderCalendar(); renderMonths();
+  }
+
+  /* ── filters ───────────────────────────────────────────────────── */
+  function buildChecks() {
+    const typeHost = document.getElementById('typeChecks');
+    for (const t of TYPES) {
+      const l = document.createElement('label');
+      l.innerHTML = `<input type="checkbox" checked data-type="${t.id}"> ${t.name}`;
+      l.querySelector('input').addEventListener('change', e => {
+        e.target.checked ? state.types.add(t.id) : state.types.delete(t.id);
+        renderSales();
+      });
+      typeHost.appendChild(l);
+    }
+    const catHost = document.getElementById('catChecks');
+    for (const c of CATS) {
+      const l = document.createElement('label');
+      l.innerHTML = `<input type="checkbox" checked data-cat="${c.id}"> <span class="cat-dot" style="background:${c.color}"></span>${c.name}`;
+      l.querySelector('input').addEventListener('change', e => {
+        e.target.checked ? state.cats.add(c.id) : state.cats.delete(c.id);
+        renderSales();
+      });
+      catHost.appendChild(l);
+    }
+  }
+
+  /* ── router + tabs + sidebar ───────────────────────────────────── */
+  const PAGES = {
+    home:   { el: 'pageHome',   title: 'หน้าหลัก',        render: renderHome },
+    sales:  { el: 'pageSales',  title: 'ยอดขาย',          render: renderSales },
+    orders: { el: 'pageOrders', title: 'คำสั่งซื้อ',        render: renderOrdersPage },
+    orderList: { el: 'pageOrderList', title: 'ออเดอร์ทั้งหมด', render: renderOrderList },
+    views:  { el: 'pageViews',  title: 'สินค้า',           render: renderViewsPage },
+    detail: { el: 'pageDetail', title: detailScopeName,    render: renderDetailPage },
+    stock:  { el: 'pageStock',  title: 'สินค้าใกล้หมด',    render: renderStockPage },
+  };
+  function showPage(page) {
+    state.page = page;
+    for (const [key, p] of Object.entries(PAGES))
+      document.getElementById(p.el).hidden = key !== page;
+    const t = PAGES[page].title;
+    document.getElementById('pageTitle').textContent = typeof t === 'function' ? t() : t;
+    updateNav();
+    PAGES[page].render();
+  }
+  function updateNav() {
+    const pg = state.page;
+    document.getElementById('navHome').classList.toggle('active', pg === 'home');
+    document.getElementById('navOrders').classList.toggle('active', pg === 'orders');
+    document.getElementById('navOrderList').classList.toggle('active', pg === 'orderList');
+    document.getElementById('navViews').classList.toggle('active', pg === 'views' || pg === 'detail');
+    document.getElementById('navStock').classList.toggle('active', pg === 'stock');
+    const dailyTab = document.getElementById('tabDaily').classList.contains('active');
+    document.getElementById('navDaily').classList.toggle('active', pg === 'sales' && dailyTab);
+    document.getElementById('navMonthly').classList.toggle('active', pg === 'sales' && !dailyTab);
+  }
+  function setTab(tab) {
+    const daily = tab === 'daily';
+    document.getElementById('tabDaily').classList.toggle('active', daily);
+    document.getElementById('tabMonthly').classList.toggle('active', !daily);
+    document.getElementById('panelDaily').hidden = !daily;
+    document.getElementById('panelMonthly').hidden = daily;
+    updateNav();
+  }
+
+  document.getElementById('navHome').addEventListener('click', () => showPage('home'));
+  document.getElementById('navOrders').addEventListener('click', () => showPage('orders'));
+  document.getElementById('navOrderList').addEventListener('click', () => showPage('orderList'));
+  document.getElementById('navOrdersBtn').addEventListener('click', () => {
+    const g = document.getElementById('navOrdersGroup');
+    g.classList.toggle('open');
+    document.getElementById('navOrdersBtn')
+      .setAttribute('aria-expanded', g.classList.contains('open'));
+  });
+  document.getElementById('navViews').addEventListener('click', () => showPage('views'));
+  document.getElementById('navStock').addEventListener('click', () => showPage('stock'));
+  document.getElementById('navProductsBtn').addEventListener('click', () => {
+    const g = document.getElementById('navProducts');
+    g.classList.toggle('open');
+    document.getElementById('navProductsBtn')
+      .setAttribute('aria-expanded', g.classList.contains('open'));
+  });
+  document.getElementById('hOrderMore').addEventListener('click', () => showPage('orders'));
+  document.getElementById('hViewMore').addEventListener('click', () => showPage('views'));
+  document.getElementById('stockMore').addEventListener('click', () => showPage('stock'));
+  document.getElementById('orderMore').addEventListener('click', () => showPage('orderList'));
+  for (const b of document.querySelectorAll('[data-back]'))
+    b.addEventListener('click', () => showPage('home'));
+  document.getElementById('tabDaily').addEventListener('click', () => setTab('daily'));
+  document.getElementById('tabMonthly').addEventListener('click', () => setTab('monthly'));
+  document.getElementById('navDaily').addEventListener('click', () => { showPage('sales'); setTab('daily'); });
+  document.getElementById('navMonthly').addEventListener('click', () => { showPage('sales'); setTab('monthly'); });
+  document.getElementById('navSalesBtn').addEventListener('click', () => {
+    const g = document.getElementById('navSales');
+    g.classList.toggle('open');
+    document.getElementById('navSalesBtn')
+      .setAttribute('aria-expanded', g.classList.contains('open'));
+  });
+  document.getElementById('calPrev').addEventListener('click', () => {
+    state.calM--; if (state.calM < 0) { state.calM = 11; state.calY--; }
+    renderCalendar();
+  });
+  document.getElementById('calNext').addEventListener('click', () => {
+    state.calM++; if (state.calM > 11) { state.calM = 0; state.calY++; }
+    renderCalendar();
+  });
+
+  /* ── หน้าคำสั่งซื้อ: ค้นหา + dropdown + แท็บ + ปฏิทิน ── */
+  document.getElementById('productCodes').innerHTML =
+    PRODUCTS.map(p => `<option value="${p.code}">${p.name}</option>`).join('');
+  document.getElementById('oCatSel').innerHTML =
+    '<option value="all">หมวดหมู่: ทั้งหมด</option>' +
+    CATS.map(c => `<option value="${c.id}">หมวดหมู่: ${c.name}</option>`).join('');
+
+  document.getElementById('oSearch').addEventListener('input', e => {
+    const q = e.target.value.trim().toUpperCase();
+    state.oCode = PRODUCTS.some(p => p.code === q) ? q : '';
+    renderTrend();
+  });
+  document.getElementById('oCatSel').addEventListener('change', e => {
+    state.oCat = e.target.value;
+    state.oCode = '';
+    document.getElementById('oSearch').value = '';
+    renderTrend();
+  });
+  document.getElementById('oGranSel').addEventListener('change', e => {
+    state.oGran = e.target.value;
+    renderTrend();
+  });
+
+  /* ── หน้าสินค้า: dropdown + ปุ่มค้นหา + กดแถวดูเชิงลึก ── */
+  document.getElementById('pCatSel').innerHTML =
+    '<option value="all">ประเภทสินค้า: ทั้งหมด</option>' +
+    CATS.map(c => `<option value="${c.id}">ประเภทสินค้า: ${c.name}</option>`).join('');
+  document.getElementById('pSearchBtn').addEventListener('click', () => {
+    state.pCat = document.getElementById('pCatSel').value;
+    state.pGran = document.getElementById('pGranSel').value;
+    renderViewsPage();
+  });
+
+  function openDetail(code) {
+    state.dCode = code;
+    state.dCat = 'all';
+    state.dGran = state.pGran;
+    state.dNotFound = '';
+    document.getElementById('dSearch').value = code;
+    document.getElementById('dCatSel').value = 'all';
+    document.getElementById('dGranSel').value = state.dGran;
+    showPage('detail');
+  }
+  document.getElementById('pTbody').addEventListener('click', e => {
+    const tr = e.target.closest('tr.clickable');
+    if (tr) openDetail(tr.dataset.code);
+  });
+  document.getElementById('pTbody').addEventListener('keydown', e => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const tr = e.target.closest('tr.clickable');
+    if (tr) { e.preventDefault(); openDetail(tr.dataset.code); }
+  });
+
+  /* ── หน้าเชิงลึกสินค้า ── */
+  document.getElementById('dCatSel').innerHTML =
+    '<option value="all">ประเภทสินค้า: ทั้งหมด</option>' +
+    CATS.map(c => `<option value="${c.id}">ประเภทสินค้า: ${c.name}</option>`).join('');
+  document.getElementById('dSearchBtn').addEventListener('click', () => {
+    state.dCat = document.getElementById('dCatSel').value;
+    state.dGran = document.getElementById('dGranSel').value;
+    const q = document.getElementById('dSearch').value.trim();
+    if (q) {
+      const qq = q.toUpperCase();
+      const p = PRODUCTS.find(x => x.code === qq)
+             || PRODUCTS.find(x => x.name.includes(q));
+      state.dCode = p ? p.code : '';
+      state.dNotFound = p ? '' : q;
+    } else {
+      state.dCode = '';
+      state.dNotFound = '';
+    }
+    showPage('detail');
+  });
+  document.getElementById('dSearch').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('dSearchBtn').click();
+  });
+  document.getElementById('dBack').addEventListener('click', () => showPage('views'));
+
+  function setOTab(tab) {
+    const daily = tab === 'daily';
+    document.getElementById('oTabDaily').classList.toggle('active', daily);
+    document.getElementById('oTabMonthly').classList.toggle('active', !daily);
+    document.getElementById('oPanelDaily').hidden = !daily;
+    document.getElementById('oPanelMonthly').hidden = daily;
+  }
+  document.getElementById('oTabDaily').addEventListener('click', () => setOTab('daily'));
+  document.getElementById('oTabMonthly').addEventListener('click', () => setOTab('monthly'));
+  document.getElementById('oCalPrev').addEventListener('click', () => {
+    state.oCalM--; if (state.oCalM < 0) { state.oCalM = 11; state.oCalY--; }
+    renderOCalendar();
+  });
+  document.getElementById('oCalNext').addEventListener('click', () => {
+    state.oCalM++; if (state.oCalM > 11) { state.oCalM = 0; state.oCalY++; }
+    renderOCalendar();
+  });
+
+  /* "เพิ่มเติม" on the sales stat → jump to the sales dashboard (today) */
+  document.getElementById('hSalesMore').addEventListener('click', () => {
+    state.mode = 'day';
+    state.selY = today.getFullYear(); state.selM = today.getMonth(); state.selD = today.getDate();
+    state.calY = state.selY; state.calM = state.selM;
+    showPage('sales'); setTab('daily');
+  });
+  document.getElementById('hRankMore').addEventListener('click', () => {
+    showPage('sales'); setTab('daily');
+  });
+  for (const btn of document.querySelectorAll('[data-soon]')) {
+    btn.addEventListener('click', () => toast('หน้าข้อมูลเชิงลึกยังเป็นฉบับร่าง — เพิ่มได้ในขั้นถัดไปครับ'));
+  }
+
+  buildChecks();
+  renderSales();
+  showPage('home');
+})();
+</script>
