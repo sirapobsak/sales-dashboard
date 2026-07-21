@@ -2159,6 +2159,8 @@
       document.getElementById(p.el).hidden = key !== page;
     const t = PAGES[page].title;
     document.getElementById('pageTitle').textContent = typeof t === 'function' ? t() : t;
+    /* ปุ่มตั้งค่า (⚙️) แสดงเฉพาะหน้าสินค้าใกล้หมด */
+    document.getElementById('gearBtn').hidden = page !== 'stock';
     updateNav();
     PAGES[page].render();
   }
