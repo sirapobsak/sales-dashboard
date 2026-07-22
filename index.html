@@ -470,6 +470,18 @@
     background: transparent; color: #fff;
   }
   .pill-tab.active { background: #fff; color: var(--card-blue); border-color: #fff; }
+  /* pill tab บนพื้นขาว (กล่องปฏิทิน) */
+  .pill-tab2 {
+    font: inherit; font-weight: 700; font-size: 0.8rem; cursor: pointer;
+    border: 2px solid var(--accent); border-radius: 99px; padding: 5px 16px;
+    background: var(--inset); color: var(--accent);
+  }
+  .pill-tab2.active { background: var(--card-blue); border-color: var(--card-blue); color: #fff; }
+  /* label สินค้าขายดีในปฏิทิน/การ์ดเดือน */
+  .cal-cell .topcat, .month-card .topcat { font-size: 0.6rem; font-weight: 800; line-height: 1.1; }
+  .cal-cell.static { cursor: default; }
+  .cal-cell.static:hover { background: none; }
+  #topTrendHost svg { width: 100%; height: auto; display: block; }
 
   .stock-tile .left.ok { color: var(--inset-muted); background: color-mix(in srgb, var(--inset-muted) 14%, transparent); }
   .data-table .num { font-variant-numeric: tabular-nums; white-space: nowrap; }
@@ -1125,23 +1137,44 @@
     </div>
 
     <!-- ══ PAGE: ประเภทสินค้าขายดี ══ -->
-    <div class="sub-layout" id="pageTopCat" hidden>
+    <div class="wide-layout" id="pageTopCat" hidden>
       <button class="back-btn" data-back>‹ กลับหน้าหลัก</button>
       <section class="card-blue">
         <div class="filter-head">
-          <h2 id="topCatTitle">ประเภทสินค้าขายดี</h2>
+          <h2>ประเภทสินค้าขายดี</h2>
+          <span class="draft-tag">ฉบับร่าง · ปรับได้ภายหลัง</span>
+        </div>
+        <div class="trend-controls">
+          <select id="topCatSel" aria-label="เลือกประเภทสินค้า"></select>
+          <select id="topScaleSel" aria-label="ช่วงเวลา">
+            <option value="day">รายวัน</option>
+            <option value="week">รายสัปดาห์</option>
+            <option value="month">รายเดือน</option>
+            <option value="year">รายปี</option>
+          </select>
+        </div>
+        <p class="trend-caption" id="topCaption"></p>
+        <div class="chart-panel">
+          <div class="ch-legend" id="topLegend"></div>
+          <div id="topTrendHost"></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="filter-head" style="margin-bottom:12px;">
+          <h2 style="font-size:1rem;">ปฏิทินสินค้าขายดี</h2>
           <div class="tabs-inline">
-            <button class="pill-tab active" id="topDailyBtn">รายวัน</button>
-            <button class="pill-tab" id="topMonthlyBtn">รายเดือน</button>
+            <button class="pill-tab2 active" id="topCalMonthBtn">รายเดือน</button>
+            <button class="pill-tab2" id="topCalYearBtn">รายปี</button>
           </div>
         </div>
-        <div class="rank-panel" id="topCatPanel"></div>
-        <div class="table-panel" style="margin-top:14px;">
-          <table class="data-table">
-            <thead><tr><th>อันดับ</th><th>ประเภทสินค้า</th><th id="topValHead">ยอดขาย</th><th>สัดส่วน</th></tr></thead>
-            <tbody id="topCatTbody"></tbody>
-          </table>
+        <div class="cal-head">
+          <button class="cal-nav" id="topCalPrev" aria-label="ก่อนหน้า">‹</button>
+          <div class="cal-title" id="topCalTitle"></div>
+          <button class="cal-nav" id="topCalNext" aria-label="ถัดไป">›</button>
         </div>
+        <div class="cal-grid" id="topCalGrid"></div>
+        <div class="month-grid" id="topYearGrid" hidden></div>
       </section>
     </div>
   </main>
@@ -1218,7 +1251,9 @@
     dCode: '', dCat: 'all', dGran: 'day', dNotFound: '',
     /* หน้าตั้งค่า (ต่อสินค้า) + ประเภทสินค้าขายดี */
     setCode: PRODUCTS[0].code, setGran: 'month',
-    topMode: 'day',
+    /* หน้าประเภทสินค้าขายดี */
+    topCat: 'all', topScale: 'month', topCalMode: 'month',
+    topCalY: today.getFullYear(), topCalM: today.getMonth(),
   };
 
   /* ── aggregation ───────────────────────────────────────────────── */
@@ -2330,29 +2365,124 @@
   }
 
   /* ══ PAGE: ประเภทสินค้าขายดี ══════════════════════════════════ */
+  /* ประเภทสินค้าขายดีที่สุดในวัน / เดือน */
+  function bestCatDay(y, m, d) {
+    let best = CATS[0], bv = -1;
+    for (const c of CATS) { const v = dayCatAll(y, m, d, c.id); if (v > bv) { bv = v; best = c; } }
+    return best;
+  }
+  function bestCatMonth(y, m) {
+    const n = new Date(y, m + 1, 0).getDate();
+    let best = CATS[0], bv = -1;
+    for (const c of CATS) { let s = 0; for (let d = 1; d <= n; d++) s += dayCatAll(y, m, d, c.id); if (s > bv) { bv = s; best = c; } }
+    return best;
+  }
+  /* buckets ตาม time scale — คืน [{label, days:[[y,m,d],...]}] */
+  function topBuckets(scale) {
+    const T = today, b = [];
+    if (scale === 'day') {
+      for (let i = 13; i >= 0; i--) { const dt = new Date(T.getFullYear(), T.getMonth(), T.getDate() - i);
+        b.push({ label: `${dt.getDate()} ${MONTHS_S[dt.getMonth()]}`, days: [[dt.getFullYear(), dt.getMonth(), dt.getDate()]] }); }
+    } else if (scale === 'week') {
+      for (let i = 9; i >= 0; i--) { const days = [];
+        for (let k = 0; k < 7; k++) { const dt = new Date(T.getFullYear(), T.getMonth(), T.getDate() - (i * 7 + k)); days.push([dt.getFullYear(), dt.getMonth(), dt.getDate()]); }
+        const end = new Date(T.getFullYear(), T.getMonth(), T.getDate() - i * 7);
+        b.push({ label: `${end.getDate()} ${MONTHS_S[end.getMonth()]}`, days }); }
+    } else if (scale === 'month') {
+      for (let i = 11; i >= 0; i--) { const mm = T.getMonth() - i, y = T.getFullYear() + Math.floor(mm / 12), m = ((mm % 12) + 12) % 12;
+        const n = new Date(y, m + 1, 0).getDate(), days = []; for (let d = 1; d <= n; d++) days.push([y, m, d]);
+        b.push({ label: MONTHS_S[m], days }); }
+    } else {
+      for (let i = 4; i >= 0; i--) { const y = T.getFullYear() - i, days = [];
+        for (let m = 0; m < 12; m++) { const n = new Date(y, m + 1, 0).getDate(); for (let d = 1; d <= n; d++) days.push([y, m, d]); }
+        b.push({ label: String(y), days }); }
+    }
+    return b;
+  }
+
+  /* กราฟเส้นหลายเส้นบนพื้นขาว (แต่ละเส้น = ประเภทสินค้า) */
+  function catTrendSvg(labels, series) {
+    const W = 680, H = 300, padL = 46, padR = 16, padT = 14, padB = 28;
+    const plotW = W - padL - padR, plotH = H - padT - padB;
+    const rawMax = Math.max(...series.flatMap(s => s.vals)) || 1;
+    const max = Math.max(1, Math.ceil(rawMax * 1.15 / 3)) * 3;
+    const n = labels.length;
+    const px = i => padL + (n === 1 ? plotW / 2 : plotW * i / (n - 1));
+    const py = v => padT + plotH - plotH * (v / max);
+    let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="แนวโน้มยอดขายตามประเภทสินค้า">`;
+    for (let g = 1; g <= 3; g++) {
+      const gy = padT + plotH - plotH * (g / 3);
+      s += `<line x1="${padL}" y1="${gy}" x2="${W - padR}" y2="${gy}" stroke="var(--grid)" stroke-width="1"/>`;
+      s += `<text x="${padL - 6}" y="${gy + 3.5}" text-anchor="end" font-size="10" fill="var(--inset-muted)">${fmtCompact(max * g / 3)}</text>`;
+    }
+    s += `<line x1="${padL}" y1="${padT + plotH}" x2="${W - padR}" y2="${padT + plotH}" stroke="var(--hairline)" stroke-width="1.5"/>`;
+    for (const sr of series) {
+      s += `<polyline fill="none" stroke="${sr.color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="${sr.vals.map((v, i) => `${px(i)},${py(v)}`).join(' ')}"/>`;
+      if (n <= 14) sr.vals.forEach((v, i) => { s += `<circle cx="${px(i)}" cy="${py(v)}" r="3" fill="${sr.color}" stroke="var(--inset)" stroke-width="1.4"/>`; });
+    }
+    const step = n <= 8 ? 1 : Math.ceil(n / 8);
+    labels.forEach((lb, i) => { const last = i === n - 1;
+      if ((i % step === 0 && n - 1 - i >= step) || last)
+        s += `<text x="${px(i)}" y="${H - 8}" text-anchor="middle" font-size="10" fill="var(--inset-muted)">${lb}</text>`; });
+    return s + '</svg>';
+  }
+
   function renderTopCatPage() {
-    const daily = state.topMode === 'day';
-    const y = today.getFullYear(), m = today.getMonth(), d = today.getDate();
-    document.getElementById('topCatTitle').textContent =
-      daily ? 'ประเภทสินค้าขายดี (รายวัน)' : 'ประเภทสินค้าขายดี (รายเดือน)';
-    document.getElementById('topDailyBtn').classList.toggle('active', daily);
-    document.getElementById('topMonthlyBtn').classList.toggle('active', !daily);
-    document.getElementById('topValHead').textContent = daily ? 'ยอดขายวันนี้' : 'ยอดขายเดือนนี้';
+    const cat = state.topCat, scale = state.topScale;
+    document.getElementById('topCatSel').value = cat;
+    document.getElementById('topScaleSel').value = scale;
+    const cats = cat === 'all' ? CATS : CATS.filter(c => c.id === cat);
+    const buckets = topBuckets(scale);
+    const labels = buckets.map(b => b.label);
+    const series = cats.map(c => ({
+      name: c.name, color: c.color,
+      vals: buckets.map(b => b.days.reduce((s, [y, m, d]) => s + dayCatAll(y, m, d, c.id), 0)),
+    }));
+    const scaleName = { day: 'รายวัน · 14 วันล่าสุด', week: 'รายสัปดาห์ · 10 สัปดาห์ล่าสุด', month: 'รายเดือน · 12 เดือนล่าสุด', year: 'รายปี · 5 ปีล่าสุด' }[scale];
+    document.getElementById('topCaption').textContent =
+      `${cat === 'all' ? 'แยกทุกประเภทสินค้า' : 'เฉพาะ' + CATS.find(c => c.id === cat).name} · ${scaleName}`;
+    document.getElementById('topLegend').innerHTML = cats.map(c =>
+      `<span class="li"><span class="dot" style="background:${c.color}"></span>${c.name}</span>`).join('');
+    document.getElementById('topTrendHost').innerHTML = catTrendSvg(labels, series);
+    renderTopCal();
+  }
 
-    const rows = CATS.map(c => ({
-      name: c.name,
-      v: daily ? dayCatAll(y, m, d, c.id) : (() => {
-        const n = new Date(y, m + 1, 0).getDate();
-        let s = 0; for (let dd = 1; dd <= n; dd++) s += dayCatAll(y, m, dd, c.id); return s;
-      })(),
-    })).sort((a, b) => b.v - a.v);
-    const total = rows.reduce((s, r) => s + r.v, 0) || 1;
+  /* กล่องปฏิทินสินค้าขายดี (แยกออกมา) */
+  function renderTopCal() {
+    const monthMode = state.topCalMode === 'month';
+    document.getElementById('topCalMonthBtn').classList.toggle('active', monthMode);
+    document.getElementById('topCalYearBtn').classList.toggle('active', !monthMode);
+    document.getElementById('topCalGrid').hidden = !monthMode;
+    document.getElementById('topYearGrid').hidden = monthMode;
 
-    document.getElementById('topCatPanel').innerHTML =
-      hBarChart(rows, fmtCompact, 'อันดับประเภทสินค้าขายดี');
-    document.getElementById('topCatTbody').innerHTML = rows.map((r, i) =>
-      `<tr><td class="num rank">${i + 1}</td><td>${r.name}</td><td class="num">${fmtFull(r.v)}</td><td class="num">${(r.v / total * 100).toFixed(1)}%</td></tr>`
-    ).join('');
+    if (monthMode) {
+      const y = state.topCalY, m = state.topCalM;
+      document.getElementById('topCalTitle').textContent = `${MONTHS[m]} ${y}`;
+      const grid = document.getElementById('topCalGrid');
+      grid.innerHTML = '';
+      for (const dw of DOWS) { const el = document.createElement('div'); el.className = 'dow'; el.textContent = dw; grid.appendChild(el); }
+      const first = new Date(y, m, 1).getDay(), n = new Date(y, m + 1, 0).getDate();
+      for (let i = 0; i < first; i++) { const el = document.createElement('div'); el.className = 'cal-cell blank'; grid.appendChild(el); }
+      for (let d = 1; d <= n; d++) {
+        const b = bestCatDay(y, m, d);
+        const el = document.createElement('div');
+        el.className = 'cal-cell static' + (isToday(y, m, d) ? ' today' : '');
+        el.innerHTML = `<span class="d">${d}</span><span class="topcat" style="color:${b.color}">${b.name}</span>`;
+        grid.appendChild(el);
+      }
+    } else {
+      const y = state.topCalY;
+      document.getElementById('topCalTitle').textContent = `ปี ${y}`;
+      const grid = document.getElementById('topYearGrid');
+      grid.innerHTML = '';
+      for (let m = 0; m < 12; m++) {
+        const b = bestCatMonth(y, m);
+        const el = document.createElement('div');
+        el.className = 'month-card static';
+        el.innerHTML = `<span class="y">${y}</span><span class="m">${MONTHS[m]}</span><span class="topcat" style="color:${b.color}">ขายดี: ${b.name}</span>`;
+        grid.appendChild(el);
+      }
+    }
   }
 
   /* ── router + tabs + sidebar ───────────────────────────────────── */
@@ -2392,8 +2522,8 @@
     setActive('navOrderList', pg === 'orderList');
     setActive('navStock', pg === 'stock');
     setActive('navSettings', pg === 'settings');
-    setActive('navTopDaily', pg === 'topcat' && state.topMode === 'day');
-    setActive('navTopMonthly', pg === 'topcat' && state.topMode === 'month');
+    setActive('navTopDaily', pg === 'topcat' && state.topScale === 'day');
+    setActive('navTopMonthly', pg === 'topcat' && state.topScale === 'month');
   }
   function setTab(tab) {
     const daily = tab === 'daily';
@@ -2429,15 +2559,15 @@
   document.getElementById('navOrderList').addEventListener('click', () => showPage('orderList'));
   document.getElementById('navStock').addEventListener('click', () => showPage('stock'));
   document.getElementById('navSettings').addEventListener('click', () => showPage('settings'));
-  document.getElementById('navTopDaily').addEventListener('click', () => { state.topMode = 'day'; showPage('topcat'); });
-  document.getElementById('navTopMonthly').addEventListener('click', () => { state.topMode = 'month'; showPage('topcat'); });
+  document.getElementById('navTopDaily').addEventListener('click', () => { state.topScale = 'day'; showPage('topcat'); });
+  document.getElementById('navTopMonthly').addEventListener('click', () => { state.topScale = 'month'; showPage('topcat'); });
 
   /* home card "เพิ่มเติม" links */
   document.getElementById('hOrderMore').addEventListener('click', () => showPage('orders'));
   document.getElementById('hViewMore').addEventListener('click', () => showPage('views'));
   document.getElementById('stockMore').addEventListener('click', () => showPage('stock'));
   document.getElementById('orderMore').addEventListener('click', () => showPage('orderList'));
-  document.getElementById('hRankMore').addEventListener('click', () => { state.topMode = 'day'; showPage('topcat'); });
+  document.getElementById('hRankMore').addEventListener('click', () => { state.topScale = 'day'; showPage('topcat'); });
   for (const b of document.querySelectorAll('[data-back]'))
     b.addEventListener('click', () => showPage('home'));
 
@@ -2482,9 +2612,24 @@
     toast(`บันทึกแล้ว: ${code} · ขั้นต่ำ ${min} ชิ้น · ระยะเวลาส่ง ${lead} วัน`);
   });
 
-  /* ประเภทสินค้าขายดี: แท็บในหน้า */
-  document.getElementById('topDailyBtn').addEventListener('click', () => { state.topMode = 'day'; renderTopCatPage(); updateNav(); });
-  document.getElementById('topMonthlyBtn').addEventListener('click', () => { state.topMode = 'month'; renderTopCatPage(); updateNav(); });
+  /* ── หน้าประเภทสินค้าขายดี: dropdown + ปฏิทิน ── */
+  document.getElementById('topCatSel').innerHTML =
+    '<option value="all">ทุกประเภทสินค้า (แยกเส้น)</option>' +
+    CATS.map(c => `<option value="${c.id}">เฉพาะ${c.name}</option>`).join('');
+  document.getElementById('topCatSel').addEventListener('change', e => { state.topCat = e.target.value; renderTopCatPage(); });
+  document.getElementById('topScaleSel').addEventListener('change', e => { state.topScale = e.target.value; renderTopCatPage(); updateNav(); });
+  document.getElementById('topCalMonthBtn').addEventListener('click', () => { state.topCalMode = 'month'; renderTopCal(); });
+  document.getElementById('topCalYearBtn').addEventListener('click', () => { state.topCalMode = 'year'; renderTopCal(); });
+  document.getElementById('topCalPrev').addEventListener('click', () => {
+    if (state.topCalMode === 'month') { state.topCalM--; if (state.topCalM < 0) { state.topCalM = 11; state.topCalY--; } }
+    else state.topCalY--;
+    renderTopCal();
+  });
+  document.getElementById('topCalNext').addEventListener('click', () => {
+    if (state.topCalMode === 'month') { state.topCalM++; if (state.topCalM > 11) { state.topCalM = 0; state.topCalY++; } }
+    else state.topCalY++;
+    renderTopCal();
+  });
   document.getElementById('calPrev').addEventListener('click', () => {
     state.calM--; if (state.calM < 0) { state.calM = 11; state.calY--; }
     renderCalendar();
