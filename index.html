@@ -170,9 +170,13 @@
   .nav-main:hover { background: rgba(19,72,184,0.08); }
   .nav-main.active { background: var(--accent-soft); color: var(--accent); }
   .nav-main .chev { transition: transform 0.18s; font-size: 0.7rem; color: var(--sidebar-muted); }
-  .nav-group.open .chev { transform: rotate(90deg); }
+  .nav-group.open > .nav-main .chev { transform: rotate(90deg); }
   .nav-sub { display: none; flex-direction: column; padding-left: 10px; }
-  .nav-group.open .nav-sub { display: flex; }
+  .nav-group.open > .nav-sub { display: flex; }
+  .nav-main.root { font-size: 1rem; font-weight: 800; }
+  /* หัวข้อกลุ่มย่อย (ชั้นในใต้หน้าหลัก) */
+  .nav-sub .nav-main { font-size: 0.88rem; font-weight: 700; padding: 9px 12px; }
+  .nav-sub .nav-sub button { font-size: 0.82rem; }
   .nav-sub button {
     text-align: left; background: none; border: 0; cursor: pointer;
     font: inherit; font-size: 0.86rem; color: var(--sidebar-muted);
@@ -696,47 +700,49 @@
 <div class="app">
   <aside class="sidebar">
     <div class="brand">Dashboard</div>
-    <div class="nav-group">
-      <button class="nav-main active" id="navHome">หน้าหลัก</button>
-    </div>
-    <div class="nav-group open">
-      <button class="nav-main" aria-expanded="true">ยอดขาย <span class="chev">❯</span></button>
+    <div class="nav-group open" id="rootGroup">
+      <button class="nav-main root active" id="navHome" aria-expanded="true">หน้าหลัก <span class="chev">❯</span></button>
       <div class="nav-sub">
-        <button id="navDaily">รายวัน</button>
-        <button id="navMonthly">รายเดือน</button>
-      </div>
-    </div>
-    <div class="nav-group open">
-      <button class="nav-main" aria-expanded="true">คำสั่งซื้อ <span class="chev">❯</span></button>
-      <div class="nav-sub">
-        <button id="navOrdersDaily">รายวัน</button>
-        <button id="navOrdersMonthly">รายเดือน</button>
-      </div>
-    </div>
-    <div class="nav-group open">
-      <button class="nav-main" aria-expanded="true">สินค้า <span class="chev">❯</span></button>
-      <div class="nav-sub">
-        <button id="navViews">อันดับสินค้า</button>
-      </div>
-    </div>
-    <div class="nav-group open">
-      <button class="nav-main" aria-expanded="true">ออเดอร์ <span class="chev">❯</span></button>
-      <div class="nav-sub">
-        <button id="navOrderList">ออเดอร์ทั้งหมด</button>
-      </div>
-    </div>
-    <div class="nav-group open">
-      <button class="nav-main" aria-expanded="true">สินค้าใกล้หมด <span class="chev">❯</span></button>
-      <div class="nav-sub">
-        <button id="navStock">สินค้าใกล้หมดทั้งหมด</button>
-        <button id="navSettings">การตั้งค่า</button>
-      </div>
-    </div>
-    <div class="nav-group open">
-      <button class="nav-main" aria-expanded="true">ประเภทสินค้าขายดี <span class="chev">❯</span></button>
-      <div class="nav-sub">
-        <button id="navTopDaily">รายวัน</button>
-        <button id="navTopMonthly">รายเดือน</button>
+        <div class="nav-group open">
+          <button class="nav-main" aria-expanded="true">ยอดขาย <span class="chev">❯</span></button>
+          <div class="nav-sub">
+            <button id="navDaily">รายวัน</button>
+            <button id="navMonthly">รายเดือน</button>
+          </div>
+        </div>
+        <div class="nav-group open">
+          <button class="nav-main" aria-expanded="true">คำสั่งซื้อ <span class="chev">❯</span></button>
+          <div class="nav-sub">
+            <button id="navOrdersDaily">รายวัน</button>
+            <button id="navOrdersMonthly">รายเดือน</button>
+          </div>
+        </div>
+        <div class="nav-group open">
+          <button class="nav-main" aria-expanded="true">สินค้า <span class="chev">❯</span></button>
+          <div class="nav-sub">
+            <button id="navViews">อันดับสินค้า</button>
+          </div>
+        </div>
+        <div class="nav-group open">
+          <button class="nav-main" aria-expanded="true">ออเดอร์ <span class="chev">❯</span></button>
+          <div class="nav-sub">
+            <button id="navOrderList">ออเดอร์ทั้งหมด</button>
+          </div>
+        </div>
+        <div class="nav-group open">
+          <button class="nav-main" aria-expanded="true">สินค้าใกล้หมด <span class="chev">❯</span></button>
+          <div class="nav-sub">
+            <button id="navStock">สินค้าใกล้หมดทั้งหมด</button>
+            <button id="navSettings">การตั้งค่า</button>
+          </div>
+        </div>
+        <div class="nav-group open">
+          <button class="nav-main" aria-expanded="true">ประเภทสินค้าขายดี <span class="chev">❯</span></button>
+          <div class="nav-sub">
+            <button id="navTopDaily">รายวัน</button>
+            <button id="navTopMonthly">รายเดือน</button>
+          </div>
+        </div>
       </div>
     </div>
   </aside>
@@ -2398,18 +2404,23 @@
     updateNav();
   }
 
-  /* group toggle ทุกหัวข้อที่มีลูกศร (chev) แบบ delegated */
+  /* group toggle ทุกหัวข้อที่มีลูกศร (chev) แบบ delegated — ยกเว้นหน้าหลัก (จัดการแยก) */
   document.querySelector('.sidebar').addEventListener('click', e => {
     const head = e.target.closest('.nav-main');
-    if (head && head.querySelector('.chev')) {
+    if (head && head.id !== 'navHome' && head.querySelector('.chev')) {
       const g = head.closest('.nav-group');
       g.classList.toggle('open');
       head.setAttribute('aria-expanded', g.classList.contains('open'));
     }
   });
 
-  /* sidebar sub-item navigation */
-  document.getElementById('navHome').addEventListener('click', () => showPage('home'));
+  /* หน้าหลัก = หัวข้อบนสุด: กดแล้วไปหน้าหลัก + เปิด/ปิดทรี 6 หัวข้อ */
+  document.getElementById('navHome').addEventListener('click', () => {
+    const g = document.getElementById('rootGroup');
+    g.classList.toggle('open');
+    document.getElementById('navHome').setAttribute('aria-expanded', g.classList.contains('open'));
+    showPage('home');
+  });
   document.getElementById('navDaily').addEventListener('click', () => { showPage('sales'); setTab('daily'); });
   document.getElementById('navMonthly').addEventListener('click', () => { showPage('sales'); setTab('monthly'); });
   document.getElementById('navOrdersDaily').addEventListener('click', () => { showPage('orders'); setOTab('daily'); });
