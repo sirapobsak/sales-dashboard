@@ -145,7 +145,11 @@
     padding: 26px 14px;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 4px;
+    max-height: 100vh;
+    overflow-y: auto;
+    position: sticky;
+    top: 0;
   }
   .sidebar .brand {
     font-weight: 800;
@@ -410,6 +414,60 @@
   .switch.on { background: var(--good); }
   .switch.on::after { left: 22px; }
   .switch:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* ปุ่มบันทึก (topbar หน้าตั้งค่า) */
+  .save-btn {
+    position: absolute; top: 50%; right: 0; transform: translateY(-50%);
+    font: inherit; font-weight: 800; font-size: 0.9rem; border: 0; cursor: pointer;
+    border-radius: 99px; padding: 10px 28px; background: #6fd376; color: #0c3a14;
+  }
+  .save-btn:hover { background: #83dd89; }
+  .save-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* หน้าตั้งค่า (ต่อสินค้า) */
+  .set-search {
+    width: 100%; font: inherit; font-size: 1rem; font-weight: 700; text-align: center;
+    border: 0; border-radius: 99px; padding: 15px 18px; background: #fff; color: #14161c;
+  }
+  .set-search:focus-visible { outline: 3px solid #9b6bff; outline-offset: 0; }
+  .set-current { color: var(--on-blue-soft); font-size: 0.82rem; margin: 10px 2px 0; text-align: center; }
+  .set-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+  .set-field { background: var(--inset); color: var(--inset-ink); border-radius: 16px; padding: 16px 18px; min-width: 0; }
+  .set-field label { display: block; font-size: 0.9rem; font-weight: 800; margin-bottom: 10px; }
+  .set-field input {
+    width: 100%; font: inherit; font-size: 1.35rem; font-weight: 800; font-variant-numeric: tabular-nums;
+    border: 1px solid var(--hairline); border-radius: 10px; padding: 8px 12px;
+    background: var(--page); color: var(--inset-ink);
+  }
+  .set-field input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+  .set-field small { display: block; font-size: 0.7rem; color: var(--inset-muted); margin-top: 8px; }
+
+  .set-lower { display: grid; grid-template-columns: minmax(0, 2fr) minmax(200px, 1fr); gap: 16px; margin-top: 16px; align-items: stretch; }
+  .set-chartbox { background: var(--inset); color: var(--inset-ink); border-radius: 16px; padding: 14px 16px 8px; min-width: 0; }
+  .set-chart-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
+  .set-chart-head h3 { margin: 0; font-size: 0.92rem; font-weight: 800; }
+  #setChart svg { width: 100%; height: auto; display: block; }
+  .set-advice { background: var(--inset); color: var(--inset-ink); border-radius: 16px; padding: 14px 16px; min-width: 0; }
+  .set-advice h3 { margin: 0 0 10px; font-size: 0.95rem; font-weight: 800; }
+  #setGranSel {
+    font: inherit; font-size: 0.78rem; font-weight: 700; border: 1px solid var(--hairline); cursor: pointer;
+    border-radius: 99px; padding: 6px 30px 6px 14px; background-color: var(--page); color: var(--inset-ink);
+    appearance: none; -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23888' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 12px center;
+  }
+  @media (max-width: 820px) { .set-fields, .set-lower { grid-template-columns: 1fr; } }
+
+  /* หน้าประเภทสินค้าขายดี */
+  .tabs-inline { display: flex; gap: 8px; }
+  .pill-tab {
+    font: inherit; font-weight: 700; font-size: 0.82rem; cursor: pointer;
+    border: 2px solid var(--on-blue-soft); border-radius: 99px; padding: 6px 18px;
+    background: transparent; color: #fff;
+  }
+  .pill-tab.active { background: #fff; color: var(--card-blue); border-color: #fff; }
+
+  .stock-tile .left.ok { color: var(--inset-muted); background: color-mix(in srgb, var(--inset-muted) 14%, transparent); }
   .data-table .num { font-variant-numeric: tabular-nums; white-space: nowrap; }
   .st-pill {
     display: inline-flex; align-items: center; gap: 6px;
@@ -641,35 +699,45 @@
     <div class="nav-group">
       <button class="nav-main active" id="navHome">หน้าหลัก</button>
     </div>
-    <div class="nav-group open" id="navSales">
-      <button class="nav-main" id="navSalesBtn" aria-expanded="true">
-        ยอดขาย <span class="chev">❯</span>
-      </button>
+    <div class="nav-group open">
+      <button class="nav-main" aria-expanded="true">ยอดขาย <span class="chev">❯</span></button>
       <div class="nav-sub">
-        <button id="navDaily">ยอดขายรายวัน</button>
-        <button id="navMonthly">ยอดขายรายเดือน</button>
+        <button id="navDaily">รายวัน</button>
+        <button id="navMonthly">รายเดือน</button>
       </div>
     </div>
-    <div class="nav-group open" id="navOrdersGroup">
-      <button class="nav-main" id="navOrdersBtn" aria-expanded="true">
-        คำสั่งซื้อ <span class="chev">❯</span>
-      </button>
+    <div class="nav-group open">
+      <button class="nav-main" aria-expanded="true">คำสั่งซื้อ <span class="chev">❯</span></button>
       <div class="nav-sub">
-        <button id="navOrders">ภาพรวมคำสั่งซื้อ</button>
+        <button id="navOrdersDaily">รายวัน</button>
+        <button id="navOrdersMonthly">รายเดือน</button>
+      </div>
+    </div>
+    <div class="nav-group open">
+      <button class="nav-main" aria-expanded="true">สินค้า <span class="chev">❯</span></button>
+      <div class="nav-sub">
+        <button id="navViews">อันดับสินค้า</button>
+      </div>
+    </div>
+    <div class="nav-group open">
+      <button class="nav-main" aria-expanded="true">ออเดอร์ <span class="chev">❯</span></button>
+      <div class="nav-sub">
         <button id="navOrderList">ออเดอร์ทั้งหมด</button>
       </div>
     </div>
-    <div class="nav-group open" id="navProducts">
-      <button class="nav-main" id="navProductsBtn" aria-expanded="true">
-        สินค้า <span class="chev">❯</span>
-      </button>
+    <div class="nav-group open">
+      <button class="nav-main" aria-expanded="true">สินค้าใกล้หมด <span class="chev">❯</span></button>
       <div class="nav-sub">
-        <button id="navViews">อันดับสินค้า</button>
-        <button id="navStock">สินค้าใกล้หมด</button>
+        <button id="navStock">สินค้าใกล้หมดทั้งหมด</button>
+        <button id="navSettings">การตั้งค่า</button>
       </div>
     </div>
-    <div class="nav-group">
-      <button class="nav-main soon" disabled>ลูกค้า <span class="tag">เร็วๆ นี้</span></button>
+    <div class="nav-group open">
+      <button class="nav-main" aria-expanded="true">ประเภทสินค้าขายดี <span class="chev">❯</span></button>
+      <div class="nav-sub">
+        <button id="navTopDaily">รายวัน</button>
+        <button id="navTopMonthly">รายเดือน</button>
+      </div>
     </div>
   </aside>
 
@@ -679,6 +747,7 @@
       <button class="gear-btn" id="gearBtn" aria-label="ตั้งค่า" title="ตั้งค่า">
         <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M12 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7zm7.4-2.5a5.6 5.6 0 0 0 0-2l1.8-1.4-1.7-3-2.2.9a5.7 5.7 0 0 0-1.7-1L15.2 4h-3.4l-.4 2.5a5.7 5.7 0 0 0-1.7 1l-2.2-.9-1.7 3L7.6 11a5.6 5.6 0 0 0 0 2l-1.8 1.4 1.7 3 2.2-.9c.5.4 1.1.7 1.7 1l.4 2.5h3.4l.4-2.5c.6-.3 1.2-.6 1.7-1l2.2.9 1.7-3L19.4 13z"/></svg>
       </button>
+      <button class="save-btn" id="saveBtn" hidden>บันทึก</button>
     </div>
 
     <!-- ══ PAGE: หน้าหลัก ══ -->
@@ -1010,31 +1079,62 @@
       </section>
     </div>
 
-    <!-- ══ PAGE: ตั้งค่า ══ -->
-    <div class="sub-layout" id="pageSettings" hidden>
+    <!-- ══ PAGE: ตั้งค่า (ต่อสินค้า) ══ -->
+    <div class="wide-layout" id="pageSettings" hidden>
+      <button class="back-btn" data-back>‹ กลับหน้าหลัก</button>
+      <section class="card-blue">
+        <input class="set-search" id="setSearch" list="productCodes"
+               placeholder="หารหัสสินค้า เช่น CH-0089 หรือพิมพ์ชื่อ เช่น เก้าอี้"
+               aria-label="ค้นหารหัสสินค้า">
+        <p class="set-current" id="setCurrent"></p>
+        <div class="set-fields">
+          <div class="set-field">
+            <label for="cfgMin">จำนวนสินค้าขั้นต่ำ (ชิ้น)</label>
+            <input type="number" id="cfgMin" min="1" inputmode="numeric">
+            <small>ถ้าคงเหลือ ≤ ค่านี้ จะถือว่า “สินค้าใกล้หมด”</small>
+          </div>
+          <div class="set-field">
+            <label for="cfgLead">ระยะเวลาจัดส่งสินค้าตัวนั้น (วัน)</label>
+            <input type="number" id="cfgLead" min="1" inputmode="numeric">
+            <small>เวลาจากโรงงานถึงโกดัง/ร้านค้า</small>
+          </div>
+        </div>
+        <div class="set-lower">
+          <div class="set-chartbox">
+            <div class="set-chart-head">
+              <h3>ยอดสั่งซื้อสินค้าจากโรงงาน</h3>
+              <select id="setGranSel" aria-label="ช่วงเวลา">
+                <option value="month">เดือนที่แล้ว</option>
+                <option value="week">อาทิตย์ที่แล้ว</option>
+              </select>
+            </div>
+            <div id="setChart"></div>
+          </div>
+          <aside class="set-advice">
+            <h3>คำแนะนำ</h3>
+            <div id="setAdvice"></div>
+          </aside>
+        </div>
+      </section>
+    </div>
+
+    <!-- ══ PAGE: ประเภทสินค้าขายดี ══ -->
+    <div class="sub-layout" id="pageTopCat" hidden>
       <button class="back-btn" data-back>‹ กลับหน้าหลัก</button>
       <section class="card-blue">
         <div class="filter-head">
-          <h2>ตั้งค่า</h2>
-          <span class="draft-tag">ฉบับร่าง · ปรับได้ภายหลัง</span>
+          <h2 id="topCatTitle">ประเภทสินค้าขายดี</h2>
+          <div class="tabs-inline">
+            <button class="pill-tab active" id="topDailyBtn">รายวัน</button>
+            <button class="pill-tab" id="topMonthlyBtn">รายเดือน</button>
+          </div>
         </div>
-        <div class="set-panel">
-          <div class="set-row">
-            <div class="lbl"><b>แจ้งเตือนสินค้าใกล้หมด</b><span>เตือนเมื่อจำนวนคงเหลือต่ำกว่าเกณฑ์</span></div>
-            <button class="switch on" role="switch" aria-checked="true" aria-label="แจ้งเตือนสินค้าใกล้หมด"></button>
-          </div>
-          <div class="set-row">
-            <div class="lbl"><b>แจ้งเตือนออเดอร์ใกล้เดดไลน์</b><span>เตือนออเดอร์ที่ใกล้ถึงกำหนดจัดส่ง</span></div>
-            <button class="switch on" role="switch" aria-checked="true" aria-label="แจ้งเตือนออเดอร์ใกล้เดดไลน์"></button>
-          </div>
-          <div class="set-row">
-            <div class="lbl"><b>คำแนะนำจาก AI</b><span>แสดงแผงคำแนะนำในหน้าสินค้าใกล้หมด</span></div>
-            <button class="switch on" role="switch" aria-checked="true" aria-label="คำแนะนำจาก AI"></button>
-          </div>
-          <div class="set-row">
-            <div class="lbl"><b>โหมดมืด</b><span>ปรับตามธีมของอุปกรณ์โดยอัตโนมัติ</span></div>
-            <button class="switch" role="switch" aria-checked="false" aria-label="โหมดมืด"></button>
-          </div>
+        <div class="rank-panel" id="topCatPanel"></div>
+        <div class="table-panel" style="margin-top:14px;">
+          <table class="data-table">
+            <thead><tr><th>อันดับ</th><th>ประเภทสินค้า</th><th id="topValHead">ยอดขาย</th><th>สัดส่วน</th></tr></thead>
+            <tbody id="topCatTbody"></tbody>
+          </table>
         </div>
       </section>
     </div>
@@ -1110,6 +1210,9 @@
     pCat: 'all', pGran: 'day',
     /* หน้าเชิงลึกสินค้า */
     dCode: '', dCat: 'all', dGran: 'day', dNotFound: '',
+    /* หน้าตั้งค่า (ต่อสินค้า) + ประเภทสินค้าขายดี */
+    setCode: PRODUCTS[0].code, setGran: 'month',
+    topMode: 'day',
   };
 
   /* ── aggregation ───────────────────────────────────────────────── */
@@ -1218,6 +1321,30 @@
     clicksFor(today.getFullYear(), today.getMonth(), today.getDate(), code);
   const stockLeft = code => 2 + Math.round(26 * rand01('left|' + code + '|' + dkey()));
 
+  /* ── per-product config (ตั้งค่าได้ในหน้าตั้งค่า → เชื่อมกับทั้งแอป) ── */
+  const CFG_KEY = 'salesdash.cfg.v1';
+  const productConfig = {};
+  PRODUCTS.forEach(p => { productConfig[p.code] = { minStock: 10, leadTime: 3 + (hash('lead|' + p.code) % 8) }; });
+  try {
+    const saved = JSON.parse(localStorage.getItem(CFG_KEY) || '{}');
+    for (const c in saved) if (productConfig[c]) Object.assign(productConfig[c], saved[c]);
+  } catch (e) { /* localStorage อาจถูกบล็อก — ใช้ค่าเริ่มต้น */ }
+  const cfg = code => productConfig[code] || { minStock: 10, leadTime: 5 };
+  function saveCfg() { try { localStorage.setItem(CFG_KEY, JSON.stringify(productConfig)); } catch (e) {} }
+  /* สถานะสต๊อกอิงเกณฑ์ขั้นต่ำที่ตั้งไว้ต่อสินค้า */
+  function stockStatus(code) {
+    const left = stockLeft(code), min = cfg(code).minStock;
+    if (left <= min) return { cls: 'low', label: 'ใกล้หมด' };
+    if (left <= min * 1.6) return { cls: 'mid', label: 'เหลือน้อย' };
+    return { cls: '', label: 'ปกติ' };
+  }
+  /* ยอดสั่งซื้อสินค้าจากโรงงาน (คนละชุดกับคำสั่งซื้อของลูกค้า) */
+  function factoryOrder(y, m, d, code) {
+    const p = PRODUCTS.find(x => x.code === code);
+    const cat = CATS.find(c => c.id === p.cat);
+    return Math.round((cat.base / 480) * seasonal(m) * (0.5 + 1.1 * rand01(`fac|${y}-${m}-${d}|${code}`)));
+  }
+
   /* referral channels — order = legend/color order (validated palette order) */
   const CHANNELS = [
     { name: 'TikTok',    w: 1.30, color: 'var(--ch1)' },
@@ -1303,14 +1430,21 @@
 
   function renderLowStock() {
     const grid = document.getElementById('stockGrid');
-    const picks = [...PRODUCTS].sort((a, b) => stockLeft(a.code) - stockLeft(b.code)).slice(0, 3);
+    /* เลือก 3 ตัวที่ใกล้ถึงเกณฑ์ขั้นต่ำที่สุด (margin = คงเหลือ − ขั้นต่ำ) */
+    const picks = [...PRODUCTS]
+      .map(p => ({ ...p, left: stockLeft(p.code), min: cfg(p.code).minStock }))
+      .sort((a, b) => (a.left - a.min) - (b.left - b.min))
+      .slice(0, 3);
     grid.innerHTML = picks.map(p => {
-      const left = stockLeft(p.code);
+      const near = p.left <= p.min;   // ถึง/ต่ำกว่าเกณฑ์ = ใกล้หมด
+      const badge = near
+        ? `<span class="left">ใกล้หมด · เหลือ ${p.left}</span>`
+        : `<span class="left ok">เหลือ ${p.left} ชิ้น</span>`;
       return `<div class="stock-tile">
         <div class="pic">${ICONS[p.cat]}</div>
         <span class="nm">${p.name}</span>
         <span class="cd">${p.code}</span>
-        <span class="left">เหลือ ${left} ชิ้น</span>
+        ${badge}
       </div>`;
     }).join('');
   }
@@ -1886,7 +2020,7 @@
 
   /* ══ PAGE: สินค้าใกล้หมด (ตาราง + แผง AI) ══════════════════════ */
   /* ระยะเวลาจัดส่งจากโรงงานถึงร้าน (วัน) — คงที่ต่อสินค้า */
-  const leadDays = code => 3 + (hash('lead|' + code) % 8);
+  const leadDays = code => cfg(code).leadTime;
   /* ยอดสั่งซื้อที่ผ่านมาแบบเลื่อนช่วง: สัปดาห์=7วัน เดือน=30วัน ปี=365วัน */
   function pastOrders(code, period) {
     const days = period === 'week' ? 7 : period === 'month' ? 30 : 365;
@@ -1907,7 +2041,7 @@
 
     document.getElementById('stockTbody').innerHTML = rows.map(p => {
       const period = stockPeriodState[p.code] || 'week';
-      const cls = p.left <= 6 ? 'low' : p.left <= 12 ? 'mid' : '';
+      const cls = stockStatus(p.code).cls;
       const opts = Object.entries(PERIOD_LABEL)
         .map(([v, t]) => `<option value="${v}"${v === period ? ' selected' : ''}>${t}</option>`).join('');
       return `<tr>
@@ -2142,6 +2276,79 @@
     }
   }
 
+  /* ══ PAGE: ตั้งค่า (ต่อสินค้า) ═════════════════════════════════ */
+  function factorySeries(code, gran) {
+    const pts = [];
+    if (gran === 'week') {
+      for (let i = 6; i >= 0; i--) {
+        const dt = new Date(today.getFullYear(), today.getMonth(), today.getDate() - i);
+        pts.push({ label: `${dt.getDate()} ${MONTHS_S[dt.getMonth()]}`, v: factoryOrder(dt.getFullYear(), dt.getMonth(), dt.getDate(), code) });
+      }
+    } else {
+      /* เดือนที่แล้ว — รายวันตลอดทั้งเดือน */
+      const pm = today.getMonth() === 0 ? 11 : today.getMonth() - 1;
+      const py = today.getMonth() === 0 ? today.getFullYear() - 1 : today.getFullYear();
+      const n = new Date(py, pm + 1, 0).getDate();
+      for (let d = 1; d <= n; d++)
+        pts.push({ label: String(d), v: factoryOrder(py, pm, d, code) });
+    }
+    return pts;
+  }
+
+  function renderSettingsPage() {
+    const code = state.setCode;
+    const p = PRODUCTS.find(x => x.code === code);
+    const c = cfg(code);
+    document.getElementById('setSearch').placeholder = `กำลังตั้งค่า: ${code} · ${p.name} (พิมพ์เพื่อเปลี่ยนสินค้า)`;
+    document.getElementById('setCurrent').textContent = `สินค้าที่กำลังตั้งค่า: ${code} · ${p.name} · หมวด${CATS.find(x => x.id === p.cat).name}`;
+    document.getElementById('cfgMin').value = c.minStock;
+    document.getElementById('cfgLead').value = c.leadTime;
+    document.getElementById('setGranSel').value = state.setGran;
+
+    const pts = factorySeries(code, state.setGran);
+    document.getElementById('setChart').innerHTML =
+      lineSvg(pts, fmtNum, `ยอดสั่งซื้อจากโรงงาน ${code}`);
+
+    /* คำแนะนำ: จุดสั่งซื้อใหม่ = ดีมานด์/วัน × lead + กันชน */
+    const weekly = pastOrders(code, 'week');
+    const daily = weekly / 7;
+    const reorderPoint = Math.ceil(daily * c.leadTime + daily * 3);
+    const left = stockLeft(code);
+    const st = stockStatus(code);
+    document.getElementById('setAdvice').innerHTML = `
+      <div class="ai-tip">คงเหลือตอนนี้ <b>${left} ชิ้น</b> · สถานะ <b>${st.label}</b></div>
+      <div class="ai-tip">ขายเฉลี่ย ~${Math.round(daily)} ชิ้น/วัน · ของใหม่ใช้เวลา ${c.leadTime} วัน</div>
+      <div class="ai-tip${left <= reorderPoint ? ' urgent' : ''}">
+        👉 ควรสั่งเพิ่มเมื่อคงเหลือ ≤ <b>${reorderPoint} ชิ้น</b>${left <= reorderPoint ? ' — <b>ถึงจุดสั่งแล้ว!</b>' : ''}
+      </div>`;
+  }
+
+  /* ══ PAGE: ประเภทสินค้าขายดี ══════════════════════════════════ */
+  function renderTopCatPage() {
+    const daily = state.topMode === 'day';
+    const y = today.getFullYear(), m = today.getMonth(), d = today.getDate();
+    document.getElementById('topCatTitle').textContent =
+      daily ? 'ประเภทสินค้าขายดี (รายวัน)' : 'ประเภทสินค้าขายดี (รายเดือน)';
+    document.getElementById('topDailyBtn').classList.toggle('active', daily);
+    document.getElementById('topMonthlyBtn').classList.toggle('active', !daily);
+    document.getElementById('topValHead').textContent = daily ? 'ยอดขายวันนี้' : 'ยอดขายเดือนนี้';
+
+    const rows = CATS.map(c => ({
+      name: c.name,
+      v: daily ? dayCatAll(y, m, d, c.id) : (() => {
+        const n = new Date(y, m + 1, 0).getDate();
+        let s = 0; for (let dd = 1; dd <= n; dd++) s += dayCatAll(y, m, dd, c.id); return s;
+      })(),
+    })).sort((a, b) => b.v - a.v);
+    const total = rows.reduce((s, r) => s + r.v, 0) || 1;
+
+    document.getElementById('topCatPanel').innerHTML =
+      hBarChart(rows, fmtCompact, 'อันดับประเภทสินค้าขายดี');
+    document.getElementById('topCatTbody').innerHTML = rows.map((r, i) =>
+      `<tr><td class="num rank">${i + 1}</td><td>${r.name}</td><td class="num">${fmtFull(r.v)}</td><td class="num">${(r.v / total * 100).toFixed(1)}%</td></tr>`
+    ).join('');
+  }
+
   /* ── router + tabs + sidebar ───────────────────────────────────── */
   const PAGES = {
     home:   { el: 'pageHome',   title: 'หน้าหลัก',        render: renderHome },
@@ -2151,7 +2358,8 @@
     views:  { el: 'pageViews',  title: 'สินค้า',           render: renderViewsPage },
     detail: { el: 'pageDetail', title: detailScopeName,    render: renderDetailPage },
     stock:  { el: 'pageStock',  title: 'สินค้าใกล้หมด',    render: renderStockPage },
-    settings: { el: 'pageSettings', title: 'ตั้งค่า',       render: () => {} },
+    settings: { el: 'pageSettings', title: 'ตั้งค่า',       render: renderSettingsPage },
+    topcat: { el: 'pageTopCat', title: 'ประเภทสินค้าขายดี', render: renderTopCatPage },
   };
   function showPage(page) {
     state.page = page;
@@ -2159,21 +2367,27 @@
       document.getElementById(p.el).hidden = key !== page;
     const t = PAGES[page].title;
     document.getElementById('pageTitle').textContent = typeof t === 'function' ? t() : t;
-    /* ปุ่มตั้งค่า (⚙️) แสดงเฉพาะหน้าสินค้าใกล้หมด */
-    document.getElementById('gearBtn').hidden = page !== 'stock';
+    document.getElementById('gearBtn').hidden = page !== 'stock';    // ⚙️ เฉพาะหน้าสินค้าใกล้หมด
+    document.getElementById('saveBtn').hidden = page !== 'settings';  // บันทึก เฉพาะหน้าตั้งค่า
     updateNav();
     PAGES[page].render();
   }
+  const setActive = (id, on) => { const el = document.getElementById(id); if (el) el.classList.toggle('active', on); };
   function updateNav() {
     const pg = state.page;
-    document.getElementById('navHome').classList.toggle('active', pg === 'home');
-    document.getElementById('navOrders').classList.toggle('active', pg === 'orders');
-    document.getElementById('navOrderList').classList.toggle('active', pg === 'orderList');
-    document.getElementById('navViews').classList.toggle('active', pg === 'views' || pg === 'detail');
-    document.getElementById('navStock').classList.toggle('active', pg === 'stock');
-    const dailyTab = document.getElementById('tabDaily').classList.contains('active');
-    document.getElementById('navDaily').classList.toggle('active', pg === 'sales' && dailyTab);
-    document.getElementById('navMonthly').classList.toggle('active', pg === 'sales' && !dailyTab);
+    const salesDaily = document.getElementById('tabDaily').classList.contains('active');
+    const ordersDaily = document.getElementById('oTabDaily').classList.contains('active');
+    setActive('navHome', pg === 'home');
+    setActive('navDaily', pg === 'sales' && salesDaily);
+    setActive('navMonthly', pg === 'sales' && !salesDaily);
+    setActive('navOrdersDaily', pg === 'orders' && ordersDaily);
+    setActive('navOrdersMonthly', pg === 'orders' && !ordersDaily);
+    setActive('navViews', pg === 'views' || pg === 'detail');
+    setActive('navOrderList', pg === 'orderList');
+    setActive('navStock', pg === 'stock');
+    setActive('navSettings', pg === 'settings');
+    setActive('navTopDaily', pg === 'topcat' && state.topMode === 'day');
+    setActive('navTopMonthly', pg === 'topcat' && state.topMode === 'month');
   }
   function setTab(tab) {
     const daily = tab === 'daily';
@@ -2184,31 +2398,43 @@
     updateNav();
   }
 
+  /* group toggle ทุกหัวข้อที่มีลูกศร (chev) แบบ delegated */
+  document.querySelector('.sidebar').addEventListener('click', e => {
+    const head = e.target.closest('.nav-main');
+    if (head && head.querySelector('.chev')) {
+      const g = head.closest('.nav-group');
+      g.classList.toggle('open');
+      head.setAttribute('aria-expanded', g.classList.contains('open'));
+    }
+  });
+
+  /* sidebar sub-item navigation */
   document.getElementById('navHome').addEventListener('click', () => showPage('home'));
-  document.getElementById('navOrders').addEventListener('click', () => showPage('orders'));
-  document.getElementById('navOrderList').addEventListener('click', () => showPage('orderList'));
-  document.getElementById('navOrdersBtn').addEventListener('click', () => {
-    const g = document.getElementById('navOrdersGroup');
-    g.classList.toggle('open');
-    document.getElementById('navOrdersBtn')
-      .setAttribute('aria-expanded', g.classList.contains('open'));
-  });
+  document.getElementById('navDaily').addEventListener('click', () => { showPage('sales'); setTab('daily'); });
+  document.getElementById('navMonthly').addEventListener('click', () => { showPage('sales'); setTab('monthly'); });
+  document.getElementById('navOrdersDaily').addEventListener('click', () => { showPage('orders'); setOTab('daily'); });
+  document.getElementById('navOrdersMonthly').addEventListener('click', () => { showPage('orders'); setOTab('monthly'); });
   document.getElementById('navViews').addEventListener('click', () => showPage('views'));
+  document.getElementById('navOrderList').addEventListener('click', () => showPage('orderList'));
   document.getElementById('navStock').addEventListener('click', () => showPage('stock'));
-  document.getElementById('navProductsBtn').addEventListener('click', () => {
-    const g = document.getElementById('navProducts');
-    g.classList.toggle('open');
-    document.getElementById('navProductsBtn')
-      .setAttribute('aria-expanded', g.classList.contains('open'));
-  });
+  document.getElementById('navSettings').addEventListener('click', () => showPage('settings'));
+  document.getElementById('navTopDaily').addEventListener('click', () => { state.topMode = 'day'; showPage('topcat'); });
+  document.getElementById('navTopMonthly').addEventListener('click', () => { state.topMode = 'month'; showPage('topcat'); });
+
+  /* home card "เพิ่มเติม" links */
   document.getElementById('hOrderMore').addEventListener('click', () => showPage('orders'));
   document.getElementById('hViewMore').addEventListener('click', () => showPage('views'));
   document.getElementById('stockMore').addEventListener('click', () => showPage('stock'));
   document.getElementById('orderMore').addEventListener('click', () => showPage('orderList'));
+  document.getElementById('hRankMore').addEventListener('click', () => { state.topMode = 'day'; showPage('topcat'); });
   for (const b of document.querySelectorAll('[data-back]'))
     b.addEventListener('click', () => showPage('home'));
 
-  /* ปุ่มตั้งค่า (⚙️) → หน้าตั้งค่า */
+  /* ปุ่มยอดขาย tab */
+  document.getElementById('tabDaily').addEventListener('click', () => setTab('daily'));
+  document.getElementById('tabMonthly').addEventListener('click', () => setTab('monthly'));
+
+  /* ⚙️ → หน้าตั้งค่า */
   document.getElementById('gearBtn').addEventListener('click', () => showPage('settings'));
 
   /* dropdown ยอดสั่งซื้อที่ผ่านมา (ต่อแถว) ในหน้าสินค้าใกล้หมด */
@@ -2216,29 +2442,38 @@
     const sel = e.target.closest('.stock-period');
     if (!sel) return;
     stockPeriodState[sel.dataset.code] = sel.value;
-    const cell = sel.parentElement.querySelector('.stock-oval');
-    cell.textContent = fmtNum(pastOrders(sel.dataset.code, sel.value)) + ' รายการ';
+    sel.parentElement.querySelector('.stock-oval').textContent =
+      fmtNum(pastOrders(sel.dataset.code, sel.value)) + ' รายการ';
   });
 
-  /* สวิตช์ในหน้าตั้งค่า (โหมดมืดสลับธีมจริง; อันอื่นเป็น toggle ฉบับร่าง) */
-  for (const sw of document.querySelectorAll('#pageSettings .switch')) {
-    sw.addEventListener('click', () => {
-      const on = sw.classList.toggle('on');
-      sw.setAttribute('aria-checked', on);
-      if (sw.getAttribute('aria-label') === 'โหมดมืด')
-        document.documentElement.setAttribute('data-theme', on ? 'dark' : 'light');
-    });
-  }
-  document.getElementById('tabDaily').addEventListener('click', () => setTab('daily'));
-  document.getElementById('tabMonthly').addEventListener('click', () => setTab('monthly'));
-  document.getElementById('navDaily').addEventListener('click', () => { showPage('sales'); setTab('daily'); });
-  document.getElementById('navMonthly').addEventListener('click', () => { showPage('sales'); setTab('monthly'); });
-  document.getElementById('navSalesBtn').addEventListener('click', () => {
-    const g = document.getElementById('navSales');
-    g.classList.toggle('open');
-    document.getElementById('navSalesBtn')
-      .setAttribute('aria-expanded', g.classList.contains('open'));
+  /* ── หน้าตั้งค่า: ค้นหาสินค้า / dropdown / บันทึก ── */
+  document.getElementById('setSearch').addEventListener('change', e => {
+    const q = e.target.value.trim();
+    if (!q) return;
+    const qq = q.toUpperCase();
+    const p = PRODUCTS.find(x => x.code === qq) || PRODUCTS.find(x => x.name.includes(q));
+    if (p) { state.setCode = p.code; renderSettingsPage(); }
+    else toast(`ไม่พบสินค้า "${q}"`);
   });
+  document.getElementById('setGranSel').addEventListener('change', e => {
+    state.setGran = e.target.value;
+    document.getElementById('setChart').innerHTML =
+      lineSvg(factorySeries(state.setCode, state.setGran), fmtNum, 'ยอดสั่งซื้อจากโรงงาน');
+  });
+  document.getElementById('saveBtn').addEventListener('click', () => {
+    const code = state.setCode;
+    const min = Math.max(1, parseInt(document.getElementById('cfgMin').value, 10) || cfg(code).minStock);
+    const lead = Math.max(1, parseInt(document.getElementById('cfgLead').value, 10) || cfg(code).leadTime);
+    productConfig[code].minStock = min;
+    productConfig[code].leadTime = lead;
+    saveCfg();
+    renderSettingsPage();
+    toast(`บันทึกแล้ว: ${code} · ขั้นต่ำ ${min} ชิ้น · ระยะเวลาส่ง ${lead} วัน`);
+  });
+
+  /* ประเภทสินค้าขายดี: แท็บในหน้า */
+  document.getElementById('topDailyBtn').addEventListener('click', () => { state.topMode = 'day'; renderTopCatPage(); updateNav(); });
+  document.getElementById('topMonthlyBtn').addEventListener('click', () => { state.topMode = 'month'; renderTopCatPage(); updateNav(); });
   document.getElementById('calPrev').addEventListener('click', () => {
     state.calM--; if (state.calM < 0) { state.calM = 11; state.calY--; }
     renderCalendar();
@@ -2349,9 +2584,6 @@
     state.mode = 'day';
     state.selY = today.getFullYear(); state.selM = today.getMonth(); state.selD = today.getDate();
     state.calY = state.selY; state.calM = state.selM;
-    showPage('sales'); setTab('daily');
-  });
-  document.getElementById('hRankMore').addEventListener('click', () => {
     showPage('sales'); setTab('daily');
   });
   for (const btn of document.querySelectorAll('[data-soon]')) {
