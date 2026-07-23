@@ -905,7 +905,7 @@
             <div class="ms-dd" id="msCat"></div>
           </div>
           <div class="ratio-box" style="border:0; padding:0;">
-            <div class="row-label">สัดส่วนตามประเภท</div>
+            <div class="row-label">สัดส่วนตามประเภท · <span id="sRatioScope" style="color:var(--accent);font-weight:700;"></span></div>
             <div class="ratio-bar" id="sRatioBar" role="img" aria-label="สัดส่วนสินค้าธรรมดา/ลดราคา">
               <div class="seg-a" style="flex:1"></div>
               <div class="seg-b" style="flex:1"></div>
@@ -1223,6 +1223,7 @@
     /* หน้ายอดขาย (ใหม่) */
     sScale: 'day', sMetric: 'cart',
     sCalY: today.getFullYear(), sCalM: today.getMonth(),
+    sSelD: null,   /* วันที่เลือกในปฏิทิน (null = ทั้งเดือน) */
     /* หน้าสินค้า (อันดับ click rate) */
     pCat: 'all', pGran: 'day',
     /* หน้าเชิงลึกสินค้า */
@@ -2149,22 +2150,35 @@
   }
 
   /* สัดส่วนสินค้าธรรมดา/ลดราคา (คิดจากเดือนของปฏิทิน · เฉพาะหมวดที่เลือก) */
+  /* ยอดขายของประเภท typeId ตามขอบเขตที่เลือก (วันเดียว = state.sSelD, ไม่งั้นทั้งเดือน) เฉพาะหมวดที่เลือก */
   function typeShare(typeId) {
-    const y = state.sCalY, m = state.sCalM, n = new Date(y, m + 1, 0).getDate();
+    const y = state.sCalY, m = state.sCalM;
     let s = 0;
-    for (let d = 1; d <= n; d++) for (const c of activeCats()) s += salesFor(y, m, d, c.id, typeId);
+    if (state.sSelD) {
+      for (const c of activeCats()) s += salesFor(y, m, state.sSelD, c.id, typeId);
+    } else {
+      const n = new Date(y, m + 1, 0).getDate();
+      for (let d = 1; d <= n; d++) for (const c of activeCats()) s += salesFor(y, m, d, c.id, typeId);
+    }
     return s;
   }
 
   function renderSalesRatio() {
-    const a = typeShare('normal'), b = typeShare('sale'), total = a + b;
+    const scope = state.sSelD ? `วันที่ ${state.sSelD} ${MONTHS_S[state.sCalM]}` : `เดือน${MONTHS[state.sCalM]}`;
+    document.getElementById('sRatioScope').textContent = scope;
+    /* นับเฉพาะประเภทที่เลือกในอัตราส่วนตัวชี้วัด */
+    const parts = activeTypes().map(t => ({
+      id: t.id, name: t.name,
+      color: t.id === 'normal' ? 'var(--s1)' : 'var(--s4)',
+      seg: t.id === 'normal' ? 'seg-a' : 'seg-b',
+      v: typeShare(t.id),
+    }));
+    const total = parts.reduce((a, p) => a + p.v, 0);
     const bar = document.getElementById('sRatioBar'), legend = document.getElementById('sRatioLegend');
-    if (total === 0) { bar.innerHTML = ''; legend.innerHTML = '<div class="li">ไม่มีข้อมูล</div>'; return; }
-    const pa = a / total * 100, pb = b / total * 100;
-    bar.innerHTML = `<div class="seg-a" style="flex:${a}"></div><div class="seg-b" style="flex:${b}"></div>`;
-    legend.innerHTML =
-      `<div class="li"><span class="cat-dot" style="background:var(--s1)"></span>สินค้าธรรมดา <b>${pa.toFixed(0)}%</b></div>` +
-      `<div class="li"><span class="cat-dot" style="background:var(--s4)"></span>สินค้าลดราคา <b>${pb.toFixed(0)}%</b></div>`;
+    if (total === 0 || parts.length === 0) { bar.innerHTML = ''; legend.innerHTML = '<div class="li">เลือกอัตราส่วน/หมวดหมู่อย่างน้อย 1 รายการ</div>'; return; }
+    bar.innerHTML = parts.map(p => `<div class="${p.seg}" style="flex:${p.v || 0.0001}"></div>`).join('');
+    legend.innerHTML = parts.map(p =>
+      `<div class="li"><span class="cat-dot" style="background:${p.color}"></span>${p.name} <b>${(p.v / total * 100).toFixed(0)}%</b></div>`).join('');
   }
 
   function renderSalesCal() {
@@ -2177,10 +2191,15 @@
     for (let i = 0; i < first; i++) { const el = document.createElement('div'); el.className = 'cal-cell blank'; grid.appendChild(el); }
     for (let d = 1; d <= n; d++) {
       const amt = dayTotal(y, m, d);
-      const el = document.createElement('div');
-      el.className = 'cal-cell static' + (isToday(y, m, d) ? ' today' : '');
-      el.innerHTML = `<span class="d">${d}</span><span class="amt">${fmtCompact(amt)}</span>`;
-      grid.appendChild(el);
+      const btn = document.createElement('button');
+      btn.className = 'cal-cell' + (isToday(y, m, d) ? ' today' : '') + (state.sSelD === d ? ' selected' : '');
+      btn.innerHTML = `<span class="d">${d}</span><span class="amt">${fmtCompact(amt)}</span>`;
+      btn.setAttribute('aria-label', `${d} ${MONTHS[m]} ${y} ยอดขาย ${fmtFull(amt)}`);
+      btn.addEventListener('click', () => {
+        state.sSelD = (state.sSelD === d) ? null : d;   /* กดซ้ำ = ยกเลิก กลับดูทั้งเดือน */
+        renderSales();
+      });
+      grid.appendChild(btn);
     }
   }
 
@@ -2495,10 +2514,10 @@
   for (const tab of document.querySelectorAll('#sScaleTabs .scale-tab'))
     tab.addEventListener('click', () => { state.sScale = tab.dataset.scale; renderSales(); updateNav(); });
   document.getElementById('sCalPrev').addEventListener('click', () => {
-    state.sCalM--; if (state.sCalM < 0) { state.sCalM = 11; state.sCalY--; } renderSales();
+    state.sCalM--; if (state.sCalM < 0) { state.sCalM = 11; state.sCalY--; } state.sSelD = null; renderSales();
   });
   document.getElementById('sCalNext').addEventListener('click', () => {
-    state.sCalM++; if (state.sCalM > 11) { state.sCalM = 0; state.sCalY++; } renderSales();
+    state.sCalM++; if (state.sCalM > 11) { state.sCalM = 0; state.sCalY++; } state.sSelD = null; renderSales();
   });
   for (const r of document.querySelectorAll('#sMetricRadios input'))
     r.addEventListener('change', () => { state.sMetric = r.value; renderSales(); });
