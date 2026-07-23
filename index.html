@@ -482,6 +482,14 @@
   .cal-cell.static { cursor: default; }
   .cal-cell.static:hover { background: none; }
   #topTrendHost svg { width: 100%; height: auto; display: block; }
+  /* layout กราฟ + ปฏิทิน ข้างกันในการ์ดน้ำเงิน */
+  .topcat-body { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(300px, 1fr); gap: 18px; align-items: start; margin-top: 14px; }
+  .topcat-chart { min-width: 0; }
+  .ch-legend.on-blue { color: rgba(255,255,255,0.85); justify-content: center; padding-bottom: 4px; }
+  .topcat-chart .trend-caption { text-align: center; margin: 0 0 6px; }
+  .topcat-cal-box { background: var(--inset); color: var(--inset-ink); border-radius: 16px; padding: 12px 14px; min-width: 0; }
+  .topcat-cal-box .cal-cell .amt { display: none; }
+  @media (max-width: 900px) { .topcat-body { grid-template-columns: 1fr; } }
 
   .stock-tile .left.ok { color: var(--inset-muted); background: color-mix(in srgb, var(--inset-muted) 14%, transparent); }
   .data-table .num { font-variant-numeric: tabular-nums; white-space: nowrap; }
@@ -1140,10 +1148,6 @@
     <div class="wide-layout" id="pageTopCat" hidden>
       <button class="back-btn" data-back>‹ กลับหน้าหลัก</button>
       <section class="card-blue">
-        <div class="filter-head">
-          <h2>ประเภทสินค้าขายดี</h2>
-          <span class="draft-tag">ฉบับร่าง · ปรับได้ภายหลัง</span>
-        </div>
         <div class="trend-controls">
           <select id="topCatSel" aria-label="เลือกประเภทสินค้า"></select>
           <select id="topScaleSel" aria-label="ช่วงเวลา">
@@ -1153,28 +1157,29 @@
             <option value="year">รายปี</option>
           </select>
         </div>
-        <p class="trend-caption" id="topCaption"></p>
-        <div class="chart-panel">
-          <div class="ch-legend" id="topLegend"></div>
-          <div id="topTrendHost"></div>
-        </div>
-      </section>
-
-      <section class="panel">
-        <div class="filter-head" style="margin-bottom:12px;">
-          <h2 style="font-size:1rem;">ปฏิทินสินค้าขายดี</h2>
-          <div class="tabs-inline">
-            <button class="pill-tab2 active" id="topCalMonthBtn">รายเดือน</button>
-            <button class="pill-tab2" id="topCalYearBtn">รายปี</button>
+        <div class="topcat-body">
+          <div class="topcat-chart">
+            <p class="trend-caption" id="topCaption"></p>
+            <div class="ch-legend on-blue" id="topLegend"></div>
+            <div id="topTrendHost"></div>
+          </div>
+          <div class="topcat-cal-box">
+            <div class="filter-head" style="margin-bottom:8px;">
+              <b style="font-size:0.9rem;">ปฏิทินสินค้าขายดี</b>
+              <div class="tabs-inline">
+                <button class="pill-tab2 active" id="topCalMonthBtn">รายเดือน</button>
+                <button class="pill-tab2" id="topCalYearBtn">รายปี</button>
+              </div>
+            </div>
+            <div class="cal-head">
+              <button class="cal-nav" id="topCalPrev" aria-label="ก่อนหน้า">‹</button>
+              <div class="cal-title" id="topCalTitle"></div>
+              <button class="cal-nav" id="topCalNext" aria-label="ถัดไป">›</button>
+            </div>
+            <div class="cal-grid" id="topCalGrid"></div>
+            <div class="month-grid" id="topYearGrid" hidden></div>
           </div>
         </div>
-        <div class="cal-head">
-          <button class="cal-nav" id="topCalPrev" aria-label="ก่อนหน้า">‹</button>
-          <div class="cal-title" id="topCalTitle"></div>
-          <button class="cal-nav" id="topCalNext" aria-label="ถัดไป">›</button>
-        </div>
-        <div class="cal-grid" id="topCalGrid"></div>
-        <div class="month-grid" id="topYearGrid" hidden></div>
       </section>
     </div>
   </main>
@@ -2412,20 +2417,22 @@
     let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="แนวโน้มยอดขายตามประเภทสินค้า">`;
     for (let g = 1; g <= 3; g++) {
       const gy = padT + plotH - plotH * (g / 3);
-      s += `<line x1="${padL}" y1="${gy}" x2="${W - padR}" y2="${gy}" stroke="var(--grid)" stroke-width="1"/>`;
-      s += `<text x="${padL - 6}" y="${gy + 3.5}" text-anchor="end" font-size="10" fill="var(--inset-muted)">${fmtCompact(max * g / 3)}</text>`;
+      s += `<line x1="${padL}" y1="${gy}" x2="${W - padR}" y2="${gy}" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>`;
+      s += `<text x="${padL - 6}" y="${gy + 3.5}" text-anchor="end" font-size="10" fill="rgba(255,255,255,0.75)">${fmtCompact(max * g / 3)}</text>`;
     }
-    s += `<line x1="${padL}" y1="${padT + plotH}" x2="${W - padR}" y2="${padT + plotH}" stroke="var(--hairline)" stroke-width="1.5"/>`;
+    s += `<line x1="${padL}" y1="${padT + plotH}" x2="${W - padR}" y2="${padT + plotH}" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>`;
     for (const sr of series) {
       s += `<polyline fill="none" stroke="${sr.color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="${sr.vals.map((v, i) => `${px(i)},${py(v)}`).join(' ')}"/>`;
-      if (n <= 14) sr.vals.forEach((v, i) => { s += `<circle cx="${px(i)}" cy="${py(v)}" r="3" fill="${sr.color}" stroke="var(--inset)" stroke-width="1.4"/>`; });
+      if (n <= 14) sr.vals.forEach((v, i) => { s += `<circle cx="${px(i)}" cy="${py(v)}" r="3" fill="${sr.color}" stroke="var(--card-blue)" stroke-width="1.4"/>`; });
     }
     const step = n <= 8 ? 1 : Math.ceil(n / 8);
     labels.forEach((lb, i) => { const last = i === n - 1;
       if ((i % step === 0 && n - 1 - i >= step) || last)
-        s += `<text x="${px(i)}" y="${H - 8}" text-anchor="middle" font-size="10" fill="var(--inset-muted)">${lb}</text>`; });
+        s += `<text x="${px(i)}" y="${H - 8}" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.75)">${lb}</text>`; });
     return s + '</svg>';
   }
+  /* สีเส้นบนพื้นน้ำเงิน (สว่างพอ + แยกเฉด) — จับคู่กับหมวดสินค้า */
+  const CAT_ONBLUE = { sofa: '#8fbcff', chair: '#f5cf4e', table: '#b6a8ff', cabinet: '#ff9a5e' };
 
   function renderTopCatPage() {
     const cat = state.topCat, scale = state.topScale;
@@ -2435,14 +2442,14 @@
     const buckets = topBuckets(scale);
     const labels = buckets.map(b => b.label);
     const series = cats.map(c => ({
-      name: c.name, color: c.color,
+      name: c.name, color: CAT_ONBLUE[c.id],
       vals: buckets.map(b => b.days.reduce((s, [y, m, d]) => s + dayCatAll(y, m, d, c.id), 0)),
     }));
     const scaleName = { day: 'รายวัน · 14 วันล่าสุด', week: 'รายสัปดาห์ · 10 สัปดาห์ล่าสุด', month: 'รายเดือน · 12 เดือนล่าสุด', year: 'รายปี · 5 ปีล่าสุด' }[scale];
     document.getElementById('topCaption').textContent =
       `${cat === 'all' ? 'แยกทุกประเภทสินค้า' : 'เฉพาะ' + CATS.find(c => c.id === cat).name} · ${scaleName}`;
     document.getElementById('topLegend').innerHTML = cats.map(c =>
-      `<span class="li"><span class="dot" style="background:${c.color}"></span>${c.name}</span>`).join('');
+      `<span class="li"><span class="dot" style="background:${CAT_ONBLUE[c.id]}"></span>${c.name}</span>`).join('');
     document.getElementById('topTrendHost').innerHTML = catTrendSvg(labels, series);
     renderTopCal();
   }
