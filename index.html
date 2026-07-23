@@ -2197,10 +2197,19 @@
       btn.setAttribute('aria-label', `${d} ${MONTHS[m]} ${y} ยอดขาย ${fmtFull(amt)}`);
       btn.addEventListener('click', () => {
         state.sSelD = (state.sSelD === d) ? null : d;   /* กดซ้ำ = ยกเลิก กลับดูทั้งเดือน */
+        state.sScale = 'day';
         renderSales();
       });
       grid.appendChild(btn);
     }
+  }
+
+  /* กระจายยอดรวมของวันเป็นรายชั่วโมง (ค่าคงที่ต่อ seed) */
+  const HOUR_SHAPE = [0.4, 0.55, 0.8, 1.05, 1.2, 1.5, 1.65, 1.1];
+  function hourWeights(seed) {
+    const w = HOUR_SHAPE.map((sh, i) => sh * (0.75 + 0.5 * rand01(seed + '|h' + i)));
+    const sum = w.reduce((a, b) => a + b, 0) || 1;
+    return w.map(x => x / sum);
   }
 
   function renderSales() {
@@ -2209,7 +2218,7 @@
     renderSalesCal();
     renderSalesRatio();
 
-    const cats = activeCats(), buckets = salesBuckets(), labels = buckets.map(b => b.label);
+    const cats = activeCats();
     const salesHost = document.getElementById('sSalesHost'), ordersHost = document.getElementById('sOrdersHost');
     if (cats.length === 0 || activeTypes().length === 0) {
       const msg = '<div class="chart-empty" style="padding:40px 0;">เลือกอัตราส่วนและหมวดหมู่อย่างน้อยอย่างละ 1 รายการ</div>';
@@ -2220,18 +2229,33 @@
     }
     const legendHtml = cats.map(c => `<span class="li"><span class="dot" style="background:${c.color}"></span>${c.name}</span>`).join('');
 
-    /* กราฟ 1: ยอดขาย (dayCat เคารพอัตราส่วนที่เลือก) */
-    const salesSeries = cats.map(c => ({ name: c.name, color: c.color,
-      vals: buckets.map(b => b.days.reduce((s, [y, m, d]) => s + dayCat(y, m, d, c.id), 0)) }));
-    document.getElementById('sSalesCap').textContent = `ยอดขาย (บาท) · ${SCALE_NAME[state.sScale]}`;
+    let labels, salesSeries, orderSeries, scopeName;
+    const dayMode = state.sScale === 'day' && state.sSelD;
+    if (dayMode) {
+      /* เลือกวัน → กระจายเป็นรายชั่วโมงของวันนั้น */
+      const y = state.sCalY, m = state.sCalM, d = state.sSelD;
+      labels = ['3', '6', '9', '12', '15', '18', '21', '24'];
+      salesSeries = cats.map(c => { const tot = dayCat(y, m, d, c.id), w = hourWeights('s|' + c.id + '|' + y + m + d);
+        return { name: c.name, color: c.color, vals: w.map(x => Math.round(tot * x)) }; });
+      orderSeries = cats.map(c => { const tot = catOrderDay(y, m, d, c.id, state.sMetric), w = hourWeights('o|' + c.id + '|' + y + m + d);
+        return { name: c.name, color: c.color, vals: w.map(x => Math.round(tot * x)) }; });
+      scopeName = `วันที่ ${d} ${MONTHS_S[m]} ${y} · รายชั่วโมง`;
+    } else {
+      const buckets = salesBuckets();
+      labels = buckets.map(b => b.label);
+      salesSeries = cats.map(c => ({ name: c.name, color: c.color,
+        vals: buckets.map(b => b.days.reduce((s, [y, m, d]) => s + dayCat(y, m, d, c.id), 0)) }));
+      orderSeries = cats.map(c => ({ name: c.name, color: c.color,
+        vals: buckets.map(b => b.days.reduce((s, [y, m, d]) => s + catOrderDay(y, m, d, c.id, state.sMetric), 0)) }));
+      scopeName = SCALE_NAME[state.sScale];
+    }
+
+    document.getElementById('sSalesCap').textContent = `ยอดขาย (บาท) · ${scopeName}`;
     document.getElementById('sSalesLegend').innerHTML = legendHtml;
     salesHost.innerHTML = catTrendSvg(labels, salesSeries);
 
-    /* กราฟ 2: คำสั่งซื้อ (ตะกร้า/ผู้ซื้อ + อัตราส่วน + หมวด) */
     const metricName = state.sMetric === 'cart' ? 'ยอดใส่ตะกร้า' : 'ยอดผู้ซื้อสินค้า';
-    const orderSeries = cats.map(c => ({ name: c.name, color: c.color,
-      vals: buckets.map(b => b.days.reduce((s, [y, m, d]) => s + catOrderDay(y, m, d, c.id, state.sMetric), 0)) }));
-    document.getElementById('sOrdersCap').textContent = `${metricName} (รายการ) · ${SCALE_NAME[state.sScale]}`;
+    document.getElementById('sOrdersCap').textContent = `${metricName} (รายการ) · ${scopeName}`;
     document.getElementById('sOrdersLegend').innerHTML = legendHtml;
     ordersHost.innerHTML = catTrendSvg(labels, orderSeries);
   }
@@ -2512,7 +2536,7 @@
   buildMS('msType', TYPES.map(t => ({ id: t.id, name: t.name })), state.types, 'ทั้งหมด');
   buildMS('msCat', CATS.map(c => ({ id: c.id, name: c.name })), state.cats, 'ทั้งหมด');
   for (const tab of document.querySelectorAll('#sScaleTabs .scale-tab'))
-    tab.addEventListener('click', () => { state.sScale = tab.dataset.scale; renderSales(); updateNav(); });
+    tab.addEventListener('click', () => { state.sScale = tab.dataset.scale; if (tab.dataset.scale !== 'day') state.sSelD = null; renderSales(); updateNav(); });
   document.getElementById('sCalPrev').addEventListener('click', () => {
     state.sCalM--; if (state.sCalM < 0) { state.sCalM = 11; state.sCalY--; } state.sSelD = null; renderSales();
   });
