@@ -526,6 +526,62 @@
     .toast, .nav-main .chev { transition: none; }
   }
 
+  /* ══ PAGE: ยอดขาย (ใหม่) ══ */
+  .sales2-layout { max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+  .sales2-top { display: grid; grid-template-columns: minmax(300px, 1fr) minmax(360px, 1.15fr); gap: 18px; align-items: start; }
+  .sales2-charts { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 940px) { .sales2-top, .sales2-charts { grid-template-columns: 1fr; } }
+
+  .scale-tabs { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .scale-tab {
+    font: inherit; font-weight: 700; font-size: 0.8rem; cursor: pointer;
+    border: 1px solid var(--card-border); border-radius: 10px; padding: 7px 14px;
+    background: var(--inset); color: var(--inset-ink);
+  }
+  .scale-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  .sales2-filters { display: flex; flex-direction: column; gap: 14px; }
+  .metric-title { font-size: 0.85rem; font-weight: 800; color: var(--on-blue); margin: 0 0 2px; }
+
+  /* multi-select dropdown (สไตล์รูปที่ 2) */
+  .ms-field { display: flex; flex-direction: column; gap: 6px; }
+  .ms-field > label { font-size: 0.82rem; font-weight: 700; color: var(--inset-muted); }
+  .ms-dd { position: relative; }
+  .ms-btn {
+    width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    font: inherit; font-size: 0.92rem; font-weight: 600; cursor: pointer;
+    background: var(--inset); color: var(--inset-ink); border: 1.5px solid var(--card-border);
+    border-radius: 12px; padding: 11px 14px;
+  }
+  .ms-dd.open .ms-btn { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .ms-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .ms-chevron {
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent-soft); color: var(--accent);
+    display: flex; align-items: center; justify-content: center; font-size: 0.62rem; transition: transform 0.15s; flex: 0 0 auto;
+  }
+  .ms-dd.open .ms-chevron { transform: rotate(180deg); }
+  .ms-pop {
+    position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 30;
+    background: #fff; border: 1px solid var(--card-border); border-radius: 14px;
+    box-shadow: 0 14px 34px rgba(19,72,184,0.16); padding: 6px; display: none;
+    max-height: 280px; overflow-y: auto;
+  }
+  .ms-dd.open .ms-pop { display: block; }
+  .ms-opt { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px; cursor: pointer; font-size: 0.92rem; color: var(--inset-ink); }
+  .ms-opt:hover { background: var(--accent-soft); }
+  .ms-opt.checked { background: var(--accent-soft); }
+  .ms-box { width: 22px; height: 22px; border-radius: 7px; border: 2px solid var(--card-border); flex: 0 0 auto; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 0.8rem; background: #fff; }
+  .ms-opt.checked .ms-box { background: var(--accent); border-color: var(--accent); }
+
+  /* metric radios (ยอดใส่ตะกร้า / ผู้ซื้อ) */
+  .metric-radios { display: flex; flex-direction: column; gap: 8px; }
+  .metric-radios label { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; cursor: pointer; padding: 8px 10px; border-radius: 10px; }
+  .metric-radios label:hover { background: var(--accent-soft); }
+  .metric-radios input { accent-color: var(--accent); width: 17px; height: 17px; cursor: pointer; }
+
+  .sline-host svg { width: 100%; height: auto; display: block; }
+  .sline-title { font-size: 0.95rem; font-weight: 800; color: var(--on-blue); margin: 0 0 4px; }
+
   /* ══ PAGE: ยอดขาย ═══════════════════════════════════════ */
   .layout {
     display: grid;
@@ -692,13 +748,6 @@
           </div>
         </div>
         <div class="nav-group open">
-          <button class="nav-main" aria-expanded="true">คำสั่งซื้อ <span class="chev">❯</span></button>
-          <div class="nav-sub">
-            <button id="navOrdersDaily">รายวัน</button>
-            <button id="navOrdersMonthly">รายเดือน</button>
-          </div>
-        </div>
-        <div class="nav-group open">
           <button class="nav-main" aria-expanded="true">สินค้า <span class="chev">❯</span></button>
           <div class="nav-sub">
             <button id="navViews">อันดับสินค้า</button>
@@ -823,129 +872,69 @@
       </div>
     </div>
 
-    <!-- ══ PAGE: ยอดขาย ══ -->
-    <div class="layout" id="pageSales" hidden>
-      <button class="back-btn span-all" data-back>‹ กลับหน้าหลัก</button>
+    <!-- ══ PAGE: ยอดขาย (ใหม่) ══ -->
+    <div class="sales2-layout" id="pageSales" hidden>
+      <button class="back-btn" data-back>‹ กลับหน้าหลัก</button>
 
-      <section class="card-blue">
-        <p class="hero-label" id="heroLabel">ยอดขายของวันนี้</p>
-        <p class="hero-value" id="heroValue">฿0</p>
-        <div class="hero-delta" id="heroDelta" hidden>
-          <span class="arrow" id="deltaArrow">▲</span>
-          <span class="pct" id="deltaPct">+0%</span>
-          <span class="vs" id="deltaVs">เทียบกับเมื่อวาน</span>
-        </div>
-        <div class="chart-panel">
-          <h3 id="chartTitle">ยอดขายตามหมวดหมู่สินค้า</h3>
-          <div id="chartHost"></div>
-        </div>
-      </section>
-
-      <div class="right-col">
+      <div class="sales2-top">
+        <!-- ปฏิทิน + time scale -->
         <section class="card-blue">
-          <div class="filter-head">
-            <h2>ดูอัตราส่วนของตัวชี้วัด</h2>
-            <span class="draft-tag">ฉบับร่าง · ปรับได้ภายหลัง</span>
+          <div class="scale-tabs" id="sScaleTabs">
+            <button class="scale-tab active" data-scale="day">รายวัน</button>
+            <button class="scale-tab" data-scale="week">รายสัปดาห์</button>
+            <button class="scale-tab" data-scale="month">รายเดือน</button>
+            <button class="scale-tab" data-scale="year">รายปี</button>
           </div>
-          <div class="filter-body">
-            <div class="filter-rows">
-              <div class="filter-row">
-                <div class="row-label">ประเภทสินค้า</div>
-                <div class="checks" id="typeChecks"></div>
-              </div>
-              <div class="filter-row">
-                <div class="row-label">หมวดหมู่สินค้า</div>
-                <div class="checks" id="catChecks"></div>
-              </div>
-            </div>
-            <div class="ratio-box">
-              <div class="row-label">สัดส่วนตามประเภท</div>
-              <div class="ratio-bar" id="ratioBar" role="img" aria-label="สัดส่วนยอดขายตามประเภทสินค้า">
-                <div class="seg-a" style="flex:1"></div>
-                <div class="seg-b" style="flex:1"></div>
-              </div>
-              <div class="ratio-legend" id="ratioLegend"></div>
-            </div>
-          </div>
-        </section>
-
-        <div class="tabs">
-          <button class="tab-btn active" id="tabDaily">ยอดขายรายวัน</button>
-          <button class="tab-btn" id="tabMonthly">ยอดขายรายเดือน</button>
-        </div>
-
-        <section class="panel" id="panelDaily">
           <div class="cal-head">
-            <button class="cal-nav" id="calPrev" aria-label="เดือนก่อนหน้า">‹</button>
-            <div class="cal-title" id="calTitle"></div>
-            <button class="cal-nav" id="calNext" aria-label="เดือนถัดไป">›</button>
+            <button class="cal-nav" id="sCalPrev" aria-label="ก่อนหน้า">‹</button>
+            <div class="cal-title" id="sCalTitle"></div>
+            <button class="cal-nav" id="sCalNext" aria-label="ถัดไป">›</button>
           </div>
-          <div class="cal-grid" id="calGrid"></div>
+          <div class="cal-grid" id="sCalGrid"></div>
+          <div class="month-grid" id="sMonthGrid" hidden></div>
         </section>
 
-        <section class="panel" id="panelMonthly" hidden>
-          <div class="month-label">เลือกเดือนเพื่อดูยอดขายรวมของเดือนนั้น</div>
-          <div class="month-grid" id="monthGrid"></div>
+        <!-- ตัวกรอง -->
+        <section class="card-blue sales2-filters">
+          <div class="ms-field">
+            <label>อัตราส่วนตัวชี้วัด</label>
+            <div class="ms-dd" id="msType"></div>
+          </div>
+          <div class="ms-field">
+            <label>หมวดหมู่สินค้า</label>
+            <div class="ms-dd" id="msCat"></div>
+          </div>
+          <div class="ratio-box" style="border:0; padding:0;">
+            <div class="row-label">สัดส่วนตามประเภท</div>
+            <div class="ratio-bar" id="sRatioBar" role="img" aria-label="สัดส่วนสินค้าธรรมดา/ลดราคา">
+              <div class="seg-a" style="flex:1"></div>
+              <div class="seg-b" style="flex:1"></div>
+            </div>
+            <div class="ratio-legend" id="sRatioLegend"></div>
+          </div>
+          <div>
+            <div class="metric-title">กราฟคำสั่งซื้อดูจาก</div>
+            <div class="metric-radios" id="sMetricRadios">
+              <label><input type="radio" name="sMetric" value="cart" checked> ยอดใส่ตะกร้า</label>
+              <label><input type="radio" name="sMetric" value="buyer"> ยอดผู้ซื้อสินค้า</label>
+            </div>
+          </div>
         </section>
       </div>
-    </div>
 
-    <!-- ══ PAGE: คำสั่งซื้อ ══ -->
-    <div class="layout" id="pageOrders" hidden>
-      <button class="back-btn span-all" data-back>‹ กลับหน้าหลัก</button>
-
-      <section class="card-blue">
-        <p class="hero-label" id="oHeroLabel">ยอดคำสั่งซื้อของวันนี้</p>
-        <p class="hero-value" id="oHeroValue">0</p>
-        <div class="hero-delta" id="oHeroDelta" hidden>
-          <span class="arrow" id="oDeltaArrow">▲</span>
-          <span class="pct" id="oDeltaPct">+0%</span>
-          <span class="vs" id="oDeltaVs">เทียบกับเมื่อวาน</span>
-        </div>
-        <div class="chart-panel">
-          <h3 id="oChartTitle">คำสั่งซื้อตามหมวดหมู่สินค้า</h3>
-          <div id="oChartHost"></div>
-        </div>
-      </section>
-
-      <div class="right-col">
+      <!-- 2 กราฟ -->
+      <div class="sales2-charts">
         <section class="card-blue">
-          <div class="filter-head">
-            <h2>ดูแนวโน้มคำสั่งซื้อ</h2>
-            <span class="draft-tag">ฉบับร่าง · ปรับได้ภายหลัง</span>
-          </div>
-          <div class="trend-controls">
-            <input id="oSearch" list="productCodes" placeholder="ค้นหารหัสสินค้า เช่น CH-0089"
-                   aria-label="ค้นหารหัสสินค้า">
-            <datalist id="productCodes"></datalist>
-            <select id="oCatSel" aria-label="เลือกหมวดหมู่สินค้า"></select>
-            <select id="oGranSel" aria-label="เลือกช่วงเวลา">
-              <option value="day">รายวัน</option>
-              <option value="month">รายเดือน</option>
-              <option value="year">รายปี</option>
-            </select>
-          </div>
-          <p class="trend-caption" id="oCaption"></p>
-          <div id="oTrendHost"></div>
+          <p class="sline-title">กราฟยอดขายสินค้า</p>
+          <p class="trend-caption" id="sSalesCap"></p>
+          <div class="ch-legend on-blue" id="sSalesLegend"></div>
+          <div class="sline-host" id="sSalesHost"></div>
         </section>
-
-        <div class="tabs">
-          <button class="tab-btn active" id="oTabDaily">คำสั่งซื้อรายวัน</button>
-          <button class="tab-btn" id="oTabMonthly">คำสั่งซื้อรายเดือน</button>
-        </div>
-
-        <section class="panel" id="oPanelDaily">
-          <div class="cal-head">
-            <button class="cal-nav" id="oCalPrev" aria-label="เดือนก่อนหน้า">‹</button>
-            <div class="cal-title" id="oCalTitle"></div>
-            <button class="cal-nav" id="oCalNext" aria-label="เดือนถัดไป">›</button>
-          </div>
-          <div class="cal-grid" id="oCalGrid"></div>
-        </section>
-
-        <section class="panel" id="oPanelMonthly" hidden>
-          <div class="month-label">เลือกเดือนเพื่อดูจำนวนคำสั่งซื้อรวมของเดือนนั้น</div>
-          <div class="month-grid" id="oMonthGrid"></div>
+        <section class="card-blue">
+          <p class="sline-title">กราฟยอดคำสั่งซื้อสินค้า</p>
+          <p class="trend-caption" id="sOrdersCap"></p>
+          <div class="ch-legend on-blue" id="sOrdersLegend"></div>
+          <div class="sline-host" id="sOrdersHost"></div>
         </section>
       </div>
     </div>
@@ -1171,6 +1160,7 @@
 </div>
 
 <div class="toast" id="toast" role="status"></div>
+<datalist id="productCodes"></datalist>
 
 <script>
 (() => {
@@ -1230,11 +1220,9 @@
     calY: today.getFullYear(), calM: today.getMonth(),
     cats: new Set(CATS.map(c => c.id)),
     types: new Set(TYPES.map(t => t.id)),
-    /* หน้าคำสั่งซื้อ */
-    oMode: 'day',
-    oSelY: today.getFullYear(), oSelM: today.getMonth(), oSelD: today.getDate(),
-    oCalY: today.getFullYear(), oCalM: today.getMonth(),
-    oCat: 'all', oCode: '', oGran: 'day',
+    /* หน้ายอดขาย (ใหม่) */
+    sScale: 'day', sMetric: 'cart',
+    sCalY: today.getFullYear(), sCalM: today.getMonth(),
     /* หน้าสินค้า (อันดับ click rate) */
     pCat: 'all', pGran: 'day',
     /* หน้าเชิงลึกสินค้า */
@@ -2126,197 +2114,135 @@
       </div>`).join('');
   }
 
-  /* ══ PAGE: ยอดขาย ═══════════════════════════════════════════════ */
-  function renderHero() {
-    const label = document.getElementById('heroLabel');
-    const value = document.getElementById('heroValue');
-    const delta = document.getElementById('heroDelta');
-    let cur, prev, vsText;
+  /* ══ PAGE: ยอดขาย (ใหม่) ══════════════════════════════════════════ */
+  /* ยอดใส่ตะกร้า (mock) = ยอดผู้ซื้อ × ปัจจัย (คนใส่ตะกร้ามากกว่าซื้อจริง) */
+  const cartFor = (y, m, d, code) => Math.round(orderFor(y, m, d, code) * (1.8 + 0.9 * rand01('cart|' + code)));
+  const SCALE_NAME = { day: 'รายวัน', week: 'รายสัปดาห์', month: 'รายเดือน', year: 'รายปี' };
 
-    if (state.mode === 'day') {
-      const { selY: y, selM: m, selD: d } = state;
-      label.textContent = isToday(y, m, d)
-        ? 'ยอดขายของวันนี้'
-        : `ยอดขายวันที่ ${d} ${MONTHS_S[m]} ${y}`;
-      cur = dayTotal(y, m, d);
-      const pd = new Date(y, m, d - 1);
-      prev = dayTotal(pd.getFullYear(), pd.getMonth(), pd.getDate());
-      vsText = isToday(y, m, d) ? 'เทียบกับเมื่อวาน' : 'เทียบกับวันก่อนหน้า';
+  /* buckets ตาม time scale (anchor = state.sCalY/sCalM) */
+  function salesBuckets() {
+    const sc = state.sScale, b = [];
+    if (sc === 'day') {
+      const y = state.sCalY, m = state.sCalM, n = new Date(y, m + 1, 0).getDate();
+      for (let d = 1; d <= n; d++) b.push({ label: String(d), days: [[y, m, d]] });
+    } else if (sc === 'week') {
+      for (let i = 9; i >= 0; i--) {
+        const days = [];
+        for (let k = 0; k < 7; k++) { const dt = new Date(today.getFullYear(), today.getMonth(), today.getDate() - (i * 7 + k)); days.push([dt.getFullYear(), dt.getMonth(), dt.getDate()]); }
+        const end = new Date(today.getFullYear(), today.getMonth(), today.getDate() - i * 7);
+        b.push({ label: `${end.getDate()} ${MONTHS_S[end.getMonth()]}`, days });
+      }
+    } else if (sc === 'month') {
+      const y = state.sCalY;
+      for (let m = 0; m < 12; m++) { const n = new Date(y, m + 1, 0).getDate(), days = []; for (let d = 1; d <= n; d++) days.push([y, m, d]); b.push({ label: MONTHS_S[m], days }); }
     } else {
-      const { selY: y, selM: m } = state;
-      label.textContent = `ยอดขายเดือน${MONTHS[m]} ${y}`;
-      cur = monthTotal(y, m);
-      const py = m === 0 ? y - 1 : y, pm = m === 0 ? 11 : m - 1;
-      prev = monthTotal(py, pm);
-      vsText = 'เทียบกับเดือนก่อนหน้า';
+      for (let i = 4; i >= 0; i--) { const y = today.getFullYear() - i, days = []; for (let m = 0; m < 12; m++) { const n = new Date(y, m + 1, 0).getDate(); for (let d = 1; d <= n; d++) days.push([y, m, d]); } b.push({ label: String(y), days }); }
     }
-
-    value.textContent = fmtFull(cur);
-    if (prev > 0 && cur > 0) {
-      const pct = (cur - prev) / prev * 100;
-      const up = pct >= 0;
-      delta.hidden = false;
-      delta.classList.toggle('up', up);
-      delta.classList.toggle('down', !up);
-      document.getElementById('deltaArrow').textContent = up ? '▲' : '▼';
-      document.getElementById('deltaPct').textContent = (up ? '+' : '') + pct.toFixed(1) + '%';
-      document.getElementById('deltaVs').textContent = vsText;
-    } else {
-      delta.hidden = true;
-    }
+    return b;
   }
 
-  function renderChart() {
-    const host = document.getElementById('chartHost');
-    const cats = activeCats();
-    document.getElementById('chartTitle').textContent =
-      state.mode === 'day' ? 'ยอดขายตามหมวดหมู่สินค้า (รายวัน)' : 'ยอดขายตามหมวดหมู่สินค้า (รายเดือน)';
-
-    if (cats.length === 0 || activeTypes().length === 0) {
-      host.innerHTML = '<div class="chart-empty">เลือกหมวดหมู่และประเภทสินค้าอย่างน้อยอย่างละ 1 รายการ</div>';
-      return;
-    }
-
-    const vals = cats.map(c => state.mode === 'day'
-      ? dayCat(state.selY, state.selM, state.selD, c.id)
-      : monthCat(state.selY, state.selM, c.id));
-    const max = Math.max(...vals) * 1.18 || 1;
-
-    const W = 460, H = 250, padL = 8, padR = 8, padT = 26, padB = 30;
-    const plotW = W - padL - padR, plotH = H - padT - padB;
-    const n = cats.length;
-    const slot = plotW / n, barW = Math.min(58, slot * 0.55);
-
-    let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="กราฟแท่งยอดขายตามหมวดหมู่">`;
-    for (let g = 1; g <= 4; g++) {
-      const gy = padT + plotH - plotH * (g / 4);
-      s += `<line x1="${padL}" y1="${gy}" x2="${W - padR}" y2="${gy}" stroke="var(--grid)" stroke-width="1"/>`;
-    }
-    s += `<line x1="${padL}" y1="${padT + plotH}" x2="${W - padR}" y2="${padT + plotH}" stroke="var(--hairline)" stroke-width="1.5"/>`;
-
-    cats.forEach((c, i) => {
-      const v = vals[i];
-      const bh = Math.max(2, plotH * (v / max));
-      const x = padL + slot * i + (slot - barW) / 2;
-      const y = padT + plotH - bh;
-      const r = Math.min(4, bh / 2);
-      s += `<path d="M${x},${y + bh} L${x},${y + r} Q${x},${y} ${x + r},${y} L${x + barW - r},${y} Q${x + barW},${y} ${x + barW},${y + r} L${x + barW},${y + bh} Z" fill="${c.color}"/>`;
-      s += `<text x="${x + barW / 2}" y="${y - 7}" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--inset-ink)">${fmtCompact(v)}</text>`;
-      s += `<text x="${x + barW / 2}" y="${padT + plotH + 19}" text-anchor="middle" font-size="12" fill="var(--inset-muted)">${c.name}</text>`;
-    });
-    s += '</svg>';
-    host.innerHTML = s;
+  /* ยอดคำสั่งซื้อของหมวด (ตะกร้า/ผู้ซื้อ) — ลดหลั่นตามสัดส่วนอัตราส่วนที่เลือก */
+  function catOrderDay(y, m, d, catId, metric) {
+    const fn = metric === 'cart' ? cartFor : orderFor;
+    const tf = (activeTypes().length / TYPES.length) || 0;
+    return PRODUCTS.filter(p => p.cat === catId).reduce((s, p) => s + fn(y, m, d, p.code), 0) * tf;
   }
 
-  function renderRatio() {
-    const a = typeTotal('normal'), b = typeTotal('sale');
-    const total = a + b;
-    const bar = document.getElementById('ratioBar');
-    const legend = document.getElementById('ratioLegend');
-    if (total === 0) {
-      bar.innerHTML = '';
-      legend.innerHTML = '<div class="li">ไม่มีข้อมูลตามตัวกรองที่เลือก</div>';
-      return;
-    }
+  /* สัดส่วนสินค้าธรรมดา/ลดราคา (คิดจากเดือนของปฏิทิน · เฉพาะหมวดที่เลือก) */
+  function typeShare(typeId) {
+    const y = state.sCalY, m = state.sCalM, n = new Date(y, m + 1, 0).getDate();
+    let s = 0;
+    for (let d = 1; d <= n; d++) for (const c of activeCats()) s += salesFor(y, m, d, c.id, typeId);
+    return s;
+  }
+
+  function renderSalesRatio() {
+    const a = typeShare('normal'), b = typeShare('sale'), total = a + b;
+    const bar = document.getElementById('sRatioBar'), legend = document.getElementById('sRatioLegend');
+    if (total === 0) { bar.innerHTML = ''; legend.innerHTML = '<div class="li">ไม่มีข้อมูล</div>'; return; }
     const pa = a / total * 100, pb = b / total * 100;
-    bar.innerHTML =
-      (a > 0 ? `<div class="seg-a" style="flex:${a}"></div>` : '') +
-      (b > 0 ? `<div class="seg-b" style="flex:${b}"></div>` : '');
+    bar.innerHTML = `<div class="seg-a" style="flex:${a}"></div><div class="seg-b" style="flex:${b}"></div>`;
     legend.innerHTML =
-      (a > 0 ? `<div class="li"><span class="cat-dot" style="background:var(--s1)"></span>สินค้าธรรมดา <b>${pa.toFixed(0)}%</b></div>` : '') +
-      (b > 0 ? `<div class="li"><span class="cat-dot" style="background:var(--s4)"></span>สินค้าลดราคา <b>${pb.toFixed(0)}%</b></div>` : '');
+      `<div class="li"><span class="cat-dot" style="background:var(--s1)"></span>สินค้าธรรมดา <b>${pa.toFixed(0)}%</b></div>` +
+      `<div class="li"><span class="cat-dot" style="background:var(--s4)"></span>สินค้าลดราคา <b>${pb.toFixed(0)}%</b></div>`;
   }
 
-  function renderCalendar() {
-    const { calY: y, calM: m } = state;
-    document.getElementById('calTitle').textContent = `${MONTHS[m]} ${y}`;
-    const grid = document.getElementById('calGrid');
+  function renderSalesCal() {
+    const y = state.sCalY, m = state.sCalM;
+    document.getElementById('sCalTitle').textContent = `${MONTHS[m]} ${y}`;
+    const grid = document.getElementById('sCalGrid');
     grid.innerHTML = '';
-    for (const d of DOWS) {
-      const el = document.createElement('div');
-      el.className = 'dow'; el.textContent = d;
-      grid.appendChild(el);
-    }
-    const first = new Date(y, m, 1).getDay();
-    const nDays = new Date(y, m + 1, 0).getDate();
-    for (let i = 0; i < first; i++) {
-      const el = document.createElement('div');
-      el.className = 'cal-cell blank';
-      grid.appendChild(el);
-    }
-    for (let d = 1; d <= nDays; d++) {
-      const btn = document.createElement('button');
-      btn.className = 'cal-cell';
-      if (isToday(y, m, d)) btn.classList.add('today');
-      if (state.mode === 'day' && state.selY === y && state.selM === m && state.selD === d)
-        btn.classList.add('selected');
+    for (const dw of DOWS) { const el = document.createElement('div'); el.className = 'dow'; el.textContent = dw; grid.appendChild(el); }
+    const first = new Date(y, m, 1).getDay(), n = new Date(y, m + 1, 0).getDate();
+    for (let i = 0; i < first; i++) { const el = document.createElement('div'); el.className = 'cal-cell blank'; grid.appendChild(el); }
+    for (let d = 1; d <= n; d++) {
       const amt = dayTotal(y, m, d);
-      btn.innerHTML = `<span class="d">${d}</span><span class="amt">${fmtCompact(amt)}</span>`;
-      btn.setAttribute('aria-label', `${d} ${MONTHS[m]} ${y} ยอดขาย ${fmtFull(amt)}`);
-      btn.addEventListener('click', () => {
-        state.mode = 'day';
-        state.selY = y; state.selM = m; state.selD = d;
-        renderSales();
-      });
-      grid.appendChild(btn);
-    }
-  }
-
-  function renderMonths() {
-    const grid = document.getElementById('monthGrid');
-    grid.innerHTML = '';
-    const start = { y: today.getFullYear(), m: today.getMonth() };
-    const items = [];
-    for (let i = 0; i < 12; i++) {
-      const m = (start.m + i) % 12;
-      const y = start.y + Math.floor((start.m + i) / 12);
-      items.push({ y, m, total: monthTotal(y, m) });
-    }
-    const best = items.reduce((a, b) => (b.total > a.total ? b : a), items[0]);
-    for (const it of items) {
-      const btn = document.createElement('button');
-      btn.className = 'month-card';
-      if (state.mode === 'month' && state.selY === it.y && state.selM === it.m)
-        btn.classList.add('selected');
-      btn.innerHTML =
-        `<span class="y">${it.y}</span><span class="m">${MONTHS[it.m]}</span>` +
-        `<span class="sum">ยอดรวม ${fmtCompact(it.total)}</span>` +
-        (it === best && it.total > 0 ? '<span class="best">เดือนที่ขายดีที่สุด</span>' : '');
-      btn.addEventListener('click', () => {
-        state.mode = 'month';
-        state.selY = it.y; state.selM = it.m;
-        renderSales();
-      });
-      grid.appendChild(btn);
+      const el = document.createElement('div');
+      el.className = 'cal-cell static' + (isToday(y, m, d) ? ' today' : '');
+      el.innerHTML = `<span class="d">${d}</span><span class="amt">${fmtCompact(amt)}</span>`;
+      grid.appendChild(el);
     }
   }
 
   function renderSales() {
-    renderHero(); renderChart(); renderRatio(); renderCalendar(); renderMonths();
+    for (const t of document.querySelectorAll('#sScaleTabs .scale-tab'))
+      t.classList.toggle('active', t.dataset.scale === state.sScale);
+    renderSalesCal();
+    renderSalesRatio();
+
+    const cats = activeCats(), buckets = salesBuckets(), labels = buckets.map(b => b.label);
+    const salesHost = document.getElementById('sSalesHost'), ordersHost = document.getElementById('sOrdersHost');
+    if (cats.length === 0 || activeTypes().length === 0) {
+      const msg = '<div class="chart-empty" style="padding:40px 0;">เลือกอัตราส่วนและหมวดหมู่อย่างน้อยอย่างละ 1 รายการ</div>';
+      salesHost.innerHTML = msg; ordersHost.innerHTML = msg;
+      document.getElementById('sSalesLegend').innerHTML = '';
+      document.getElementById('sOrdersLegend').innerHTML = '';
+      return;
+    }
+    const legendHtml = cats.map(c => `<span class="li"><span class="dot" style="background:${c.color}"></span>${c.name}</span>`).join('');
+
+    /* กราฟ 1: ยอดขาย (dayCat เคารพอัตราส่วนที่เลือก) */
+    const salesSeries = cats.map(c => ({ name: c.name, color: c.color,
+      vals: buckets.map(b => b.days.reduce((s, [y, m, d]) => s + dayCat(y, m, d, c.id), 0)) }));
+    document.getElementById('sSalesCap').textContent = `ยอดขาย (บาท) · ${SCALE_NAME[state.sScale]}`;
+    document.getElementById('sSalesLegend').innerHTML = legendHtml;
+    salesHost.innerHTML = catTrendSvg(labels, salesSeries);
+
+    /* กราฟ 2: คำสั่งซื้อ (ตะกร้า/ผู้ซื้อ + อัตราส่วน + หมวด) */
+    const metricName = state.sMetric === 'cart' ? 'ยอดใส่ตะกร้า' : 'ยอดผู้ซื้อสินค้า';
+    const orderSeries = cats.map(c => ({ name: c.name, color: c.color,
+      vals: buckets.map(b => b.days.reduce((s, [y, m, d]) => s + catOrderDay(y, m, d, c.id, state.sMetric), 0)) }));
+    document.getElementById('sOrdersCap').textContent = `${metricName} (รายการ) · ${SCALE_NAME[state.sScale]}`;
+    document.getElementById('sOrdersLegend').innerHTML = legendHtml;
+    ordersHost.innerHTML = catTrendSvg(labels, orderSeries);
   }
 
-  /* ── filters ───────────────────────────────────────────────────── */
-  function buildChecks() {
-    const typeHost = document.getElementById('typeChecks');
-    for (const t of TYPES) {
-      const l = document.createElement('label');
-      l.innerHTML = `<input type="checkbox" checked data-type="${t.id}"> ${t.name}`;
-      l.querySelector('input').addEventListener('change', e => {
-        e.target.checked ? state.types.add(t.id) : state.types.delete(t.id);
-        renderSales();
-      });
-      typeHost.appendChild(l);
-    }
-    const catHost = document.getElementById('catChecks');
-    for (const c of CATS) {
-      const l = document.createElement('label');
-      l.innerHTML = `<input type="checkbox" checked data-cat="${c.id}"> <span class="cat-dot" style="background:${c.color}"></span>${c.name}`;
-      l.querySelector('input').addEventListener('change', e => {
-        e.target.checked ? state.cats.add(c.id) : state.cats.delete(c.id);
-        renderSales();
-      });
-      catHost.appendChild(l);
-    }
+  /* ── multi-select dropdown (สไตล์รูปที่ 2) ── */
+  function buildMS(hostId, options, selectedSet, allLabel) {
+    const host = document.getElementById(hostId);
+    host.innerHTML =
+      `<button class="ms-btn" type="button"><span class="ms-label"></span><span class="ms-chevron">▼</span></button>` +
+      `<div class="ms-pop">${options.map(o => `<div class="ms-opt" data-id="${o.id}"><span class="ms-box">✓</span>${o.name}</div>`).join('')}</div>`;
+    const pop = host.querySelector('.ms-pop');
+    const sync = () => {
+      for (const opt of pop.querySelectorAll('.ms-opt')) opt.classList.toggle('checked', selectedSet.has(opt.dataset.id));
+      const n = selectedSet.size, total = options.length;
+      host.querySelector('.ms-label').textContent =
+        n === 0 ? 'ยังไม่เลือก' : (n === total ? (allLabel || 'ทั้งหมด') : `เลือกแล้ว ${n} รายการ`);
+    };
+    host.querySelector('.ms-btn').addEventListener('click', () => {
+      const wasOpen = host.classList.contains('open');
+      document.querySelectorAll('.ms-dd.open').forEach(d => d.classList.remove('open'));
+      if (!wasOpen) host.classList.add('open');
+    });
+    pop.addEventListener('click', e => {
+      const opt = e.target.closest('.ms-opt'); if (!opt) return;
+      const id = opt.dataset.id;
+      selectedSet.has(id) ? selectedSet.delete(id) : selectedSet.add(id);
+      sync(); renderSales();
+    });
+    host._sync = sync;
+    sync();
   }
 
   /* ══ PAGE: ตั้งค่า (ต่อสินค้า) ═════════════════════════════════ */
@@ -2493,7 +2419,6 @@
   const PAGES = {
     home:   { el: 'pageHome',   title: 'หน้าหลัก',        render: renderHome },
     sales:  { el: 'pageSales',  title: 'ยอดขาย',          render: renderSales },
-    orders: { el: 'pageOrders', title: 'คำสั่งซื้อ',        render: renderOrdersPage },
     orderList: { el: 'pageOrderList', title: 'ออเดอร์ทั้งหมด', render: renderOrderList },
     views:  { el: 'pageViews',  title: 'สินค้า',           render: renderViewsPage },
     detail: { el: 'pageDetail', title: detailScopeName,    render: renderDetailPage },
@@ -2515,27 +2440,15 @@
   const setActive = (id, on) => { const el = document.getElementById(id); if (el) el.classList.toggle('active', on); };
   function updateNav() {
     const pg = state.page;
-    const salesDaily = document.getElementById('tabDaily').classList.contains('active');
-    const ordersDaily = document.getElementById('oTabDaily').classList.contains('active');
     setActive('navHome', pg === 'home');
-    setActive('navDaily', pg === 'sales' && salesDaily);
-    setActive('navMonthly', pg === 'sales' && !salesDaily);
-    setActive('navOrdersDaily', pg === 'orders' && ordersDaily);
-    setActive('navOrdersMonthly', pg === 'orders' && !ordersDaily);
+    setActive('navDaily', pg === 'sales' && state.sScale === 'day');
+    setActive('navMonthly', pg === 'sales' && state.sScale === 'month');
     setActive('navViews', pg === 'views' || pg === 'detail');
     setActive('navOrderList', pg === 'orderList');
     setActive('navStock', pg === 'stock');
     setActive('navSettings', pg === 'settings');
     setActive('navTopDaily', pg === 'topcat' && state.topScale === 'day');
     setActive('navTopMonthly', pg === 'topcat' && state.topScale === 'month');
-  }
-  function setTab(tab) {
-    const daily = tab === 'daily';
-    document.getElementById('tabDaily').classList.toggle('active', daily);
-    document.getElementById('tabMonthly').classList.toggle('active', !daily);
-    document.getElementById('panelDaily').hidden = !daily;
-    document.getElementById('panelMonthly').hidden = daily;
-    updateNav();
   }
 
   /* group toggle ทุกหัวข้อที่มีลูกศร (chev) แบบ delegated — ยกเว้นหน้าหลัก (จัดการแยก) */
@@ -2555,10 +2468,8 @@
     document.getElementById('navHome').setAttribute('aria-expanded', g.classList.contains('open'));
     showPage('home');
   });
-  document.getElementById('navDaily').addEventListener('click', () => { showPage('sales'); setTab('daily'); });
-  document.getElementById('navMonthly').addEventListener('click', () => { showPage('sales'); setTab('monthly'); });
-  document.getElementById('navOrdersDaily').addEventListener('click', () => { showPage('orders'); setOTab('daily'); });
-  document.getElementById('navOrdersMonthly').addEventListener('click', () => { showPage('orders'); setOTab('monthly'); });
+  document.getElementById('navDaily').addEventListener('click', () => { state.sScale = 'day'; showPage('sales'); });
+  document.getElementById('navMonthly').addEventListener('click', () => { state.sScale = 'month'; showPage('sales'); });
   document.getElementById('navViews').addEventListener('click', () => showPage('views'));
   document.getElementById('navOrderList').addEventListener('click', () => showPage('orderList'));
   document.getElementById('navStock').addEventListener('click', () => showPage('stock'));
@@ -2578,9 +2489,23 @@
   for (const b of document.querySelectorAll('[data-back]'))
     b.addEventListener('click', () => showPage('home'));
 
-  /* ปุ่มยอดขาย tab */
-  document.getElementById('tabDaily').addEventListener('click', () => setTab('daily'));
-  document.getElementById('tabMonthly').addEventListener('click', () => setTab('monthly'));
+  /* ── หน้ายอดขาย (ใหม่): time scale + ปฏิทิน + metric + multi-select ── */
+  buildMS('msType', TYPES.map(t => ({ id: t.id, name: t.name })), state.types, 'ทั้งหมด');
+  buildMS('msCat', CATS.map(c => ({ id: c.id, name: c.name })), state.cats, 'ทั้งหมด');
+  for (const tab of document.querySelectorAll('#sScaleTabs .scale-tab'))
+    tab.addEventListener('click', () => { state.sScale = tab.dataset.scale; renderSales(); updateNav(); });
+  document.getElementById('sCalPrev').addEventListener('click', () => {
+    state.sCalM--; if (state.sCalM < 0) { state.sCalM = 11; state.sCalY--; } renderSales();
+  });
+  document.getElementById('sCalNext').addEventListener('click', () => {
+    state.sCalM++; if (state.sCalM > 11) { state.sCalM = 0; state.sCalY++; } renderSales();
+  });
+  for (const r of document.querySelectorAll('#sMetricRadios input'))
+    r.addEventListener('change', () => { state.sMetric = r.value; renderSales(); });
+  /* ปิด multi-select เมื่อคลิกนอกกล่อง */
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.ms-dd')) document.querySelectorAll('.ms-dd.open').forEach(d => d.classList.remove('open'));
+  });
 
   /* ⚙️ → หน้าตั้งค่า */
   document.getElementById('gearBtn').addEventListener('click', () => showPage('settings'));
@@ -2637,37 +2562,9 @@
     else state.topCalY++;
     renderTopCal();
   });
-  document.getElementById('calPrev').addEventListener('click', () => {
-    state.calM--; if (state.calM < 0) { state.calM = 11; state.calY--; }
-    renderCalendar();
-  });
-  document.getElementById('calNext').addEventListener('click', () => {
-    state.calM++; if (state.calM > 11) { state.calM = 0; state.calY++; }
-    renderCalendar();
-  });
-
-  /* ── หน้าคำสั่งซื้อ: ค้นหา + dropdown + แท็บ + ปฏิทิน ── */
+  /* datalist รหัสสินค้า (ช่องค้นหาหน้าตั้งค่า/เชิงลึก) */
   document.getElementById('productCodes').innerHTML =
     PRODUCTS.map(p => `<option value="${p.code}">${p.name}</option>`).join('');
-  document.getElementById('oCatSel').innerHTML =
-    '<option value="all">หมวดหมู่: ทั้งหมด</option>' +
-    CATS.map(c => `<option value="${c.id}">หมวดหมู่: ${c.name}</option>`).join('');
-
-  document.getElementById('oSearch').addEventListener('input', e => {
-    const q = e.target.value.trim().toUpperCase();
-    state.oCode = PRODUCTS.some(p => p.code === q) ? q : '';
-    renderTrend();
-  });
-  document.getElementById('oCatSel').addEventListener('change', e => {
-    state.oCat = e.target.value;
-    state.oCode = '';
-    document.getElementById('oSearch').value = '';
-    renderTrend();
-  });
-  document.getElementById('oGranSel').addEventListener('change', e => {
-    state.oGran = e.target.value;
-    renderTrend();
-  });
 
   /* ── หน้าสินค้า: dropdown + ปุ่มค้นหา + กดแถวดูเชิงลึก ── */
   document.getElementById('pCatSel').innerHTML =
@@ -2724,37 +2621,16 @@
   });
   document.getElementById('dBack').addEventListener('click', () => showPage('views'));
 
-  function setOTab(tab) {
-    const daily = tab === 'daily';
-    document.getElementById('oTabDaily').classList.toggle('active', daily);
-    document.getElementById('oTabMonthly').classList.toggle('active', !daily);
-    document.getElementById('oPanelDaily').hidden = !daily;
-    document.getElementById('oPanelMonthly').hidden = daily;
-  }
-  document.getElementById('oTabDaily').addEventListener('click', () => setOTab('daily'));
-  document.getElementById('oTabMonthly').addEventListener('click', () => setOTab('monthly'));
-  document.getElementById('oCalPrev').addEventListener('click', () => {
-    state.oCalM--; if (state.oCalM < 0) { state.oCalM = 11; state.oCalY--; }
-    renderOCalendar();
-  });
-  document.getElementById('oCalNext').addEventListener('click', () => {
-    state.oCalM++; if (state.oCalM > 11) { state.oCalM = 0; state.oCalY++; }
-    renderOCalendar();
-  });
-
-  /* "เพิ่มเติม" on the sales stat → jump to the sales dashboard (today) */
+  /* "เพิ่มเติม" การ์ดยอดขายหน้าหลัก → หน้ายอดขาย */
   document.getElementById('hSalesMore').addEventListener('click', () => {
-    state.mode = 'day';
-    state.selY = today.getFullYear(); state.selM = today.getMonth(); state.selD = today.getDate();
-    state.calY = state.selY; state.calM = state.selM;
-    showPage('sales'); setTab('daily');
+    state.sScale = 'day';
+    state.sCalY = today.getFullYear(); state.sCalM = today.getMonth();
+    showPage('sales');
   });
   for (const btn of document.querySelectorAll('[data-soon]')) {
     btn.addEventListener('click', () => toast('หน้าข้อมูลเชิงลึกยังเป็นฉบับร่าง — เพิ่มได้ในขั้นถัดไปครับ'));
   }
 
-  buildChecks();
-  renderSales();
   showPage('home');
 })();
 </script>
