@@ -4,10 +4,10 @@
 <style>
   :root {
     color-scheme: light;
-    --page: #eef0f4;
-    --sidebar: #d7dae0;
-    --sidebar-ink: #3a3f4a;
-    --sidebar-muted: #7a8090;
+    --page: #edf3fc;
+    --sidebar: #ffffff;
+    --sidebar-ink: #21365c;
+    --sidebar-muted: #7d8aa3;
     --card-blue: #1348b8;
     --card-blue-deep: #0e3a99;
     --card-orange: #e06a1f;
@@ -233,6 +233,34 @@
     padding: 3px 8px; border-radius: 8px; white-space: nowrap;
   }
   .more-link:hover { background: rgba(255,255,255,0.16); color: #fff; }
+  .more-link.accent { color: var(--accent); }
+  .more-link.accent:hover { background: var(--accent-soft); color: var(--accent); }
+
+  /* การ์ดขาว (โทนขาว-ฟ้า) */
+  .card-white {
+    background: var(--inset); color: var(--inset-ink);
+    border-radius: 26px; padding: 22px 24px;
+    border: 1px solid var(--hairline);
+    box-shadow: 0 8px 24px rgba(19,72,184,0.07);
+  }
+  .chart-card .cc-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
+  .cc-label { font-size: 0.9rem; font-weight: 600; color: var(--inset-muted); margin: 0 0 2px; }
+  .cc-value { font-size: 1.9rem; font-weight: 800; line-height: 1.1; margin: 0; color: var(--accent); letter-spacing: 0.01em; }
+  .cc-delta { display: inline-flex; align-items: center; gap: 5px; margin-top: 6px; font-size: 0.78rem; font-weight: 700; }
+  .cc-delta.up .num { color: var(--good); }
+  .cc-delta.down .num { color: var(--bad); }
+  .cc-delta .vs { color: var(--inset-muted); font-weight: 500; }
+  .cc-controls { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex: 0 0 auto; }
+  .cc-scale {
+    font: inherit; font-size: 0.76rem; font-weight: 700; cursor: pointer;
+    border: 1px solid var(--hairline); border-radius: 99px; padding: 6px 28px 6px 14px;
+    background-color: var(--page); color: var(--inset-ink);
+    appearance: none; -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23888' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 11px center;
+  }
+  .cc-scale:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  #salesChartHost svg, #viewsChartHost svg { width: 100%; height: auto; display: block; }
 
   /* ══ PAGE: หน้าหลัก ══════════════════════════════════════ */
   .home-layout {
@@ -779,27 +807,60 @@
     <!-- ══ PAGE: หน้าหลัก ══ -->
     <div class="home-layout" id="pageHome">
       <div class="home-col">
-        <div class="stat-row">
-          <section class="card-blue stat-card">
-            <p class="s-label">ยอดขายของวันนี้</p>
-            <p class="s-value" id="hSalesVal">฿0</p>
-            <span class="s-delta" id="hSalesDelta"><span class="num"></span><span class="vs">เทียบเมื่อวาน</span></span>
-            <button class="more-link" id="hSalesMore">เพิ่มเติม ›</button>
-          </section>
-          <section class="card-blue stat-card">
-            <p class="s-label">คำสั่งซื้อวันนี้</p>
-            <p class="s-value" id="hOrderVal">0</p>
-            <span class="s-delta" id="hOrderDelta"><span class="num"></span><span class="vs">เทียบเมื่อวาน</span></span>
-            <button class="more-link" id="hOrderMore">เพิ่มเติม ›</button>
-          </section>
-          <section class="card-blue stat-card">
-            <p class="s-label">สินค้าที่มีผู้ชมมากที่สุด</p>
-            <p class="s-value" id="hViewVal">0</p>
-            <p class="s-sub" id="hViewProd">—</p>
-            <button class="more-link" id="hViewMore">เพิ่มเติม ›</button>
-          </section>
-        </div>
+        <!-- ยอดขายวันนี้ (กราฟเส้น) -->
+        <section class="card-white chart-card">
+          <div class="cc-head">
+            <div class="cc-title">
+              <p class="cc-label">ยอดขายของวันนี้</p>
+              <p class="cc-value" id="hSalesVal">฿0</p>
+              <span class="cc-delta" id="hSalesDelta"><span class="num"></span> <span class="vs">เทียบเมื่อวาน</span></span>
+            </div>
+            <div class="cc-controls">
+              <select class="cc-scale" id="salesScaleSel" aria-label="ช่วงเวลายอดขาย">
+                <option value="day">รายวัน</option>
+                <option value="week">รายสัปดาห์</option>
+                <option value="month">รายเดือน</option>
+                <option value="year">รายปี</option>
+              </select>
+              <button class="more-link accent" id="hSalesMore">เพิ่มเติม ›</button>
+            </div>
+          </div>
+          <div id="salesChartHost"></div>
+        </section>
 
+        <!-- ยอดการเข้าชมเว็บ (กราฟเส้น) -->
+        <section class="card-white chart-card">
+          <div class="cc-head">
+            <div class="cc-title">
+              <p class="cc-label">ยอดการเข้าชมเว็บวันนี้</p>
+              <p class="cc-value" id="hViewVal">0 ครั้ง</p>
+              <span class="cc-delta" id="hViewDelta"><span class="num"></span> <span class="vs">เทียบเมื่อวาน</span></span>
+            </div>
+            <div class="cc-controls">
+              <select class="cc-scale" id="viewsScaleSel" aria-label="ช่วงเวลายอดเข้าชม">
+                <option value="day">รายวัน</option>
+                <option value="week">รายสัปดาห์</option>
+                <option value="month">รายเดือน</option>
+                <option value="year">รายปี</option>
+              </select>
+              <button class="more-link accent" id="hViewMore">เพิ่มเติม ›</button>
+            </div>
+          </div>
+          <div id="viewsChartHost"></div>
+        </section>
+
+        <!-- สินค้าใกล้หมด -->
+        <section class="card-blue">
+          <div class="card-head">
+            <h2>สินค้าใกล้หมด</h2>
+            <button class="more-link" id="stockMore">เพิ่มเติม ›</button>
+          </div>
+          <div class="stock-grid" id="stockGrid"></div>
+        </section>
+      </div>
+
+      <div class="home-col">
+        <!-- ออเดอร์ทั้งหมด -->
         <section class="card-orange">
           <div class="card-head">
             <h2>Order ทั้งหมด</h2>
@@ -817,17 +878,8 @@
             </div>
           </div>
         </section>
-      </div>
 
-      <div class="home-col">
-        <section class="card-blue">
-          <div class="card-head">
-            <h2>สินค้าใกล้หมด</h2>
-            <button class="more-link" id="stockMore">เพิ่มเติม ›</button>
-          </div>
-          <div class="stock-grid" id="stockGrid"></div>
-        </section>
-
+        <!-- ประเภทสินค้าขายดี -->
         <section class="card-blue">
           <div class="card-head">
             <h2>ประเภทสินค้าขายดีวันนี้</h2>
@@ -1257,6 +1309,7 @@
     /* หน้าตั้งค่า (ต่อสินค้า) + ประเภทสินค้าขายดี */
     setCode: PRODUCTS[0].code, setGran: 'month',
     /* หน้าประเภทสินค้าขายดี */
+    salesScale: 'week', viewsScale: 'week',
     topCat: 'all', topScale: 'month', topCalMode: 'month',
     topCalY: today.getFullYear(), topCalM: today.getMonth(),
   };
@@ -1442,6 +1495,8 @@
     el.querySelector('.num').textContent = d.text;
   }
 
+  const totalViews = (y, m, d) => PRODUCTS.reduce((s, p) => s + clicksFor(y, m, d, p.code), 0);
+
   function renderHomeStats() {
     const y = today.getFullYear(), m = today.getMonth(), d = today.getDate();
     const pd = new Date(y, m, d - 1);
@@ -1451,15 +1506,24 @@
     document.getElementById('hSalesVal').textContent = fmtFull(sToday);
     setDelta('hSalesDelta', sToday, sPrev);
 
-    const oToday = orderCount(y, m, d);
-    const oPrev = orderCount(pd.getFullYear(), pd.getMonth(), pd.getDate());
-    document.getElementById('hOrderVal').textContent = fmtNum(oToday) + ' รายการ';
-    setDelta('hOrderDelta', oToday, oPrev);
+    const vToday = totalViews(y, m, d);
+    const vPrev = totalViews(pd.getFullYear(), pd.getMonth(), pd.getDate());
+    document.getElementById('hViewVal').textContent = fmtNum(vToday) + ' ครั้ง';
+    setDelta('hViewDelta', vToday, vPrev);
 
-    const prod = PRODUCTS.reduce((a, b) => productViews(b.code) > productViews(a.code) ? b : a, PRODUCTS[0]);
-    const views = productViews(prod.code);
-    document.getElementById('hViewVal').textContent = fmtNum(views) + ' ครั้ง';
-    document.getElementById('hViewProd').textContent = `${prod.code} · ${prod.name}`;
+    renderHomeCharts();
+  }
+
+  /* กราฟเส้นบนการ์ดขาว — ยอดขาย/ยอดเข้าชม ตาม time scale (ใช้ topBuckets ร่วมกัน) */
+  const homeTrend = (scale, valFn) =>
+    topBuckets(scale).map(b => ({ label: b.label, v: b.days.reduce((s, [y, m, d]) => s + valFn(y, m, d), 0) }));
+  function renderHomeCharts() {
+    document.getElementById('salesScaleSel').value = state.salesScale;
+    document.getElementById('viewsScaleSel').value = state.viewsScale;
+    document.getElementById('salesChartHost').innerHTML =
+      lineSvg(homeTrend(state.salesScale, dayTotalAll), fmtCompact, 'แนวโน้มยอดขาย', 'var(--accent)', 560, 200);
+    document.getElementById('viewsChartHost').innerHTML =
+      lineSvg(homeTrend(state.viewsScale, totalViews), fmtNum, 'แนวโน้มยอดเข้าชม', '#0ea371', 560, 200);
   }
 
   /* pick n distinct products deterministically (step 3 is coprime with the
@@ -1934,8 +1998,8 @@
   }
 
   /* single-series line chart on a white panel */
-  function lineSvg(pts, fmtVal, ariaLabel) {
-    const W = 320, H = 205, padL = 36, padR = 12, padT = 14, padB = 24;
+  function lineSvg(pts, fmtVal, ariaLabel, color = 'var(--s1)', W = 320, H = 205) {
+    const padL = 40, padR = 14, padT = 14, padB = 24;
     const plotW = W - padL - padR, plotH = H - padT - padB;
     /* ปัดเพดานแกนขึ้นเป็นจำนวนเต็มที่หาร 3 ลงตัว → ป้ายกริดไม่ซ้ำกัน */
     const max = Math.max(3, Math.ceil(Math.max(...pts.map(p => p.v)) * 1.15 / 3) * 3);
@@ -1950,12 +2014,12 @@
       s += `<text x="${padL - 5}" y="${gy + 3.5}" text-anchor="end" font-size="9" fill="var(--inset-muted)">${fmtVal(max * g / 3)}</text>`;
     }
     s += `<line x1="${padL}" y1="${padT + plotH}" x2="${W - padR}" y2="${padT + plotH}" stroke="var(--hairline)" stroke-width="1.5"/>`;
-    s += `<polyline fill="none" stroke="var(--s1)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" points="${pts.map((p, i) => `${px(i)},${py(p.v)}`).join(' ')}"/>`;
+    s += `<polyline fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="${pts.map((p, i) => `${px(i)},${py(p.v)}`).join(' ')}"/>`;
     const step = n <= 8 ? 1 : Math.ceil(n / 6);
     pts.forEach((p, i) => {
       const last = i === n - 1;
       if (last || n <= 12)
-        s += `<circle cx="${px(i)}" cy="${py(p.v)}" r="${last ? 4 : 2.5}" fill="var(--s1)" stroke="var(--inset)" stroke-width="1.5"/>`;
+        s += `<circle cx="${px(i)}" cy="${py(p.v)}" r="${last ? 4 : 2.5}" fill="${color}" stroke="var(--inset)" stroke-width="1.5"/>`;
       if (last) s += `<text x="${px(i)}" y="${py(p.v) - 9}" text-anchor="end" font-size="10.5" font-weight="700" fill="var(--inset-ink)">${fmtVal(p.v)}</text>`;
       if ((i % step === 0 && n - 1 - i >= step) || last)
         s += `<text x="${px(i)}" y="${H - 8}" text-anchor="middle" font-size="9" fill="var(--inset-muted)">${p.label}</text>`;
@@ -2570,11 +2634,14 @@
   document.getElementById('navTopMonthly').addEventListener('click', () => { state.topScale = 'month'; showPage('topcat'); });
 
   /* home card "เพิ่มเติม" links */
-  document.getElementById('hOrderMore').addEventListener('click', () => showPage('orders'));
   document.getElementById('hViewMore').addEventListener('click', () => showPage('views'));
   document.getElementById('stockMore').addEventListener('click', () => showPage('stock'));
   document.getElementById('orderMore').addEventListener('click', () => showPage('orderList'));
   document.getElementById('hRankMore').addEventListener('click', () => { state.topScale = 'day'; showPage('topcat'); });
+
+  /* time scale dropdown ของการ์ดกราฟหน้าหลัก */
+  document.getElementById('salesScaleSel').addEventListener('change', e => { state.salesScale = e.target.value; renderHomeCharts(); });
+  document.getElementById('viewsScaleSel').addEventListener('change', e => { state.viewsScale = e.target.value; renderHomeCharts(); });
   for (const b of document.querySelectorAll('[data-back]'))
     b.addEventListener('click', () => showPage('home'));
 
