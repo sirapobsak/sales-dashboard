@@ -764,9 +764,10 @@
           </div>
         </div>
         <div class="nav-group open">
-          <button class="nav-main" aria-expanded="true">สินค้า <span class="chev">❯</span></button>
+          <button class="nav-main" aria-expanded="true">ยอดการเข้าชม <span class="chev">❯</span></button>
           <div class="nav-sub">
-            <button id="navViews">อันดับสินค้า</button>
+            <button id="navViews">ยอดการเข้าชมทั้งหมด</button>
+            <button id="navDetail">ข้อมูลเชิงลึกการเข้าชมสินค้า</button>
           </div>
         </div>
         <div class="nav-group open">
@@ -2671,7 +2672,8 @@
     setActive('navWeekly', pg === 'sales' && state.sScale === 'week');
     setActive('navMonthly', pg === 'sales' && state.sScale === 'month');
     setActive('navYearly', pg === 'sales' && state.sScale === 'year');
-    setActive('navViews', pg === 'visits' || pg === 'detail');
+    setActive('navViews', pg === 'visits');
+    setActive('navDetail', pg === 'detail');
     setActive('navOrderList', pg === 'orderList');
     setActive('navStock', pg === 'stock');
     setActive('navSettings', pg === 'settings');
@@ -2701,6 +2703,13 @@
   document.getElementById('navMonthly').addEventListener('click', () => { state.sScale = 'month'; state.sSelD = null; showPage('sales'); });
   document.getElementById('navYearly').addEventListener('click', () => { state.sScale = 'year'; state.sSelD = null; showPage('sales'); });
   document.getElementById('navViews').addEventListener('click', () => showPage('visits'));
+  document.getElementById('navDetail').addEventListener('click', () => {
+    state.dCode = ''; state.dCat = 'all'; state.dNotFound = '';
+    document.getElementById('dSearch').value = '';
+    document.getElementById('dCatSel').value = 'all';
+    document.getElementById('dGranSel').value = state.dGran;
+    showPage('detail');
+  });
   document.getElementById('navOrderList').addEventListener('click', () => showPage('orderList'));
   document.getElementById('navStock').addEventListener('click', () => showPage('stock'));
   document.getElementById('navSettings').addEventListener('click', () => showPage('settings'));
