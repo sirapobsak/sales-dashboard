@@ -987,9 +987,48 @@
       </section>
     </div>
 
-    <!-- ══ PAGE: สินค้า (อันดับตาม click rate) ══ -->
-    <div class="sub-layout" id="pageViews" hidden>
+    <!-- ══ PAGE: ยอดการเข้าชมเว็บ (กราฟแพลตฟอร์ม + สัดส่วนผู้ซื้อ + อันดับ click rate) ══ -->
+    <div class="sales2-layout" id="pageVisits" hidden>
       <button class="back-btn" data-back>‹ กลับหน้าหลัก</button>
+
+      <!-- 2 กราฟด้านบน -->
+      <div class="sales2-charts">
+        <!-- กราฟ 1: ผู้เข้าชมแยกตามแพลตฟอร์ม -->
+        <section class="card-blue">
+          <p class="sline-title">ยอดการเข้าชมเว็บ · แยกตามแพลตฟอร์ม</p>
+          <div class="trend-controls">
+            <div class="ms-dd" id="vPlatMs"></div>
+            <select id="vScale1Sel" aria-label="ช่วงเวลากราฟแพลตฟอร์ม">
+              <option value="day">รายวัน</option>
+              <option value="week">รายสัปดาห์</option>
+              <option value="month">รายเดือน</option>
+              <option value="year">รายปี</option>
+            </select>
+          </div>
+          <p class="trend-caption" id="vPlatCap"></p>
+          <div class="ch-legend on-blue" id="vPlatLegend"></div>
+          <div class="sline-host" id="vPlatHost"></div>
+        </section>
+
+        <!-- กราฟ 2: สัดส่วนผู้ชมเป็นผู้ซื้อ -->
+        <section class="card-blue">
+          <p class="sline-title">สัดส่วนผู้ชมเป็นผู้ซื้อ</p>
+          <div class="trend-controls">
+            <div class="ms-dd" id="vConvMs"></div>
+            <select id="vScale2Sel" aria-label="ช่วงเวลากราฟผู้ซื้อ">
+              <option value="day">รายวัน</option>
+              <option value="week">รายสัปดาห์</option>
+              <option value="month">รายเดือน</option>
+              <option value="year">รายปี</option>
+            </select>
+          </div>
+          <p class="trend-caption" id="vConvCap"></p>
+          <div class="ch-legend on-blue" id="vConvLegend"></div>
+          <div class="sline-host" id="vConvHost"></div>
+        </section>
+      </div>
+
+      <!-- ระบบเดิม: อันดับสินค้าตาม Click rate (ย่อลงมาอยู่ด้านล่าง) -->
       <section class="card-blue">
         <div class="filter-head">
           <h2>อันดับสินค้าตาม Click rate</h2>
@@ -1229,6 +1268,9 @@
     sSelD: null,   /* วันที่เลือกในปฏิทิน (null = ทั้งเดือน) */
     /* หน้าสินค้า (อันดับ click rate) */
     pCat: 'all', pGran: 'day',
+    /* หน้ายอดการเข้าชมเว็บ (ใหม่) — 2 กราฟ + อันดับ click rate */
+    vPlats: new Set(), vScale1: 'day',       /* กราฟแพลตฟอร์ม */
+    vConvPlats: new Set(), vScale2: 'day',   /* กราฟผู้ชม→ผู้ซื้อ */
     /* หน้าเชิงลึกสินค้า */
     dCode: '', dCat: 'all', dGran: 'day', dNotFound: '',
     /* หน้าตั้งค่า (ต่อสินค้า) + ประเภทสินค้าขายดี */
@@ -1390,6 +1432,20 @@
     }
     return best;
   }
+  /* แบ่งยอดรวมของวันออกเป็นสัดส่วนต่อแพลตฟอร์ม (สัดส่วนคงที่ต่อวัน) → คืน map ชื่อ→จำนวน */
+  function channelSplit(y, m, d, total) {
+    const shares = CHANNELS.map(c => c.w * (0.6 + 0.8 * rand01(`csplit|${y}-${m}-${d}|${c.name}`)));
+    const sum = shares.reduce((a, b) => a + b, 0) || 1;
+    const out = {};
+    CHANNELS.forEach((c, i) => { out[c.name] = total * shares[i] / sum; });
+    return out;
+  }
+  /* อัตราแปลงผู้ชม→ผู้ซื้อ ต่างกันตามแพลตฟอร์ม (mock — ปรับได้ภายหลัง) */
+  const CH_CONV = { TikTok: 0.010, Google: 0.019, Instagram: 0.013, LINE: 0.024, Facebook: 0.016 };
+  /* ผู้เข้าชมต่อวันของแต่ละแพลตฟอร์ม / ผู้ซื้อ = ผู้ชมของแพลตฟอร์มนั้น × อัตราแปลง */
+  const channelViews  = (y, m, d, chName) => Math.round(channelSplit(y, m, d, totalViews(y, m, d))[chName]);
+  const channelBuyers = (y, m, d, chName) =>
+    Math.round(channelViews(y, m, d, chName) * CH_CONV[chName] * (0.8 + 0.4 * rand01(`conv|${y}-${m}-${d}|${chName}`)));
 
   /* ── product icons (drawn SVG — swap for real photos later) ────── */
   const ICONS = {
@@ -1909,6 +1965,53 @@
     </tr>`).join('');
   }
 
+  /* ══ PAGE: ยอดการเข้าชมเว็บ (2 กราฟ + อันดับ click rate เดิม) ═════ */
+  const V_SCALE_NAME = { day: 'รายวัน · 14 วันล่าสุด', week: 'รายสัปดาห์ · 10 สัปดาห์ล่าสุด', month: 'รายเดือน · 12 เดือนล่าสุด', year: 'รายปี · 5 ปีล่าสุด' };
+  function renderVisitsPage() {
+    /* ── กราฟ 1: ผู้เข้าชมแยกตามแพลตฟอร์ม ── */
+    document.getElementById('vScale1Sel').value = state.vScale1;
+    const b1 = topBuckets(state.vScale1), labels1 = b1.map(b => b.label);
+    const plats1 = CHANNELS.filter(c => state.vPlats.has(c.name));
+    const host1 = document.getElementById('vPlatHost'), legend1 = document.getElementById('vPlatLegend');
+    if (plats1.length === 0) {
+      host1.innerHTML = '<div class="chart-empty">เลือกแพลตฟอร์มอย่างน้อย 1 รายการ</div>';
+      legend1.innerHTML = '';
+    } else {
+      const series1 = plats1.map(c => ({ name: c.name, color: c.color,
+        vals: b1.map(b => b.days.reduce((s, [y, m, d]) => s + channelViews(y, m, d, c.name), 0)) }));
+      legend1.innerHTML = plats1.map(c => `<span class="li"><span class="dot" style="background:${c.color}"></span>${c.name}</span>`).join('');
+      host1.innerHTML = catTrendSvg(labels1, series1);
+    }
+    document.getElementById('vPlatCap').textContent = `ผู้เข้าชมเว็บแยกตามแพลตฟอร์ม · ${V_SCALE_NAME[state.vScale1]}`;
+
+    /* ── กราฟ 2: ผู้ชม → ผู้ซื้อ ของแพลตฟอร์มที่เลือก (รวมกัน) ── */
+    document.getElementById('vScale2Sel').value = state.vScale2;
+    const b2 = topBuckets(state.vScale2), labels2 = b2.map(b => b.label);
+    const plats2 = CHANNELS.filter(c => state.vConvPlats.has(c.name));
+    const host2 = document.getElementById('vConvHost'), legend2 = document.getElementById('vConvLegend');
+    if (plats2.length === 0) {
+      host2.innerHTML = '<div class="chart-empty">เลือกแพลตฟอร์มอย่างน้อย 1 รายการ</div>';
+      legend2.innerHTML = '';
+      document.getElementById('vConvCap').textContent = `เลือกแพลตฟอร์มเพื่อดูสัดส่วนผู้ซื้อ · ${V_SCALE_NAME[state.vScale2]}`;
+    } else {
+      const viewersVals = b2.map(b => b.days.reduce((s, [y, m, d]) => s + plats2.reduce((ss, c) => ss + channelViews(y, m, d, c.name), 0), 0));
+      const buyersVals  = b2.map(b => b.days.reduce((s, [y, m, d]) => s + plats2.reduce((ss, c) => ss + channelBuyers(y, m, d, c.name), 0), 0));
+      const series2 = [
+        { name: 'ผู้เข้าชม', color: 'var(--accent)', vals: viewersVals },
+        { name: 'ผู้ซื้อ',   color: '#0ea371',      vals: buyersVals },
+      ];
+      legend2.innerHTML = series2.map(s => `<span class="li"><span class="dot" style="background:${s.color}"></span>${s.name}</span>`).join('');
+      host2.innerHTML = catTrendSvg(labels2, series2);
+      const totV = viewersVals.reduce((a, b) => a + b, 0), totB = buyersVals.reduce((a, b) => a + b, 0);
+      const rate = totV > 0 ? (totB / totV * 100).toFixed(1) : '0';
+      const scopeName = plats2.length === CHANNELS.length ? 'ทุกแพลตฟอร์ม' : plats2.map(c => c.name).join(', ');
+      document.getElementById('vConvCap').textContent = `${scopeName} · แปลงเป็นผู้ซื้อ ~${rate}% · ${V_SCALE_NAME[state.vScale2]}`;
+    }
+
+    /* ── ระบบเดิม: อันดับ click rate (ด้านล่าง) ── */
+    renderViewsPage();
+  }
+
   /* ══ PAGE: ข้อมูลเชิงลึกสินค้า ═════════════════════════════════ */
   function detailScopeProducts() {
     if (state.dCode) {
@@ -2328,7 +2431,7 @@
   }
 
   /* ── multi-select dropdown (สไตล์รูปที่ 2) ── */
-  function buildMS(hostId, options, selectedSet, allLabel) {
+  function buildMS(hostId, options, selectedSet, allLabel, onChange) {
     const host = document.getElementById(hostId);
     host.innerHTML =
       `<button class="ms-btn" type="button"><span class="ms-label"></span><span class="ms-chevron">▼</span></button>` +
@@ -2349,7 +2452,7 @@
       const opt = e.target.closest('.ms-opt'); if (!opt) return;
       const id = opt.dataset.id;
       selectedSet.has(id) ? selectedSet.delete(id) : selectedSet.add(id);
-      sync(); renderSales();
+      sync(); (onChange || renderSales)();
     });
     host._sync = sync;
     sync();
@@ -2530,7 +2633,7 @@
     home:   { el: 'pageHome',   title: 'หน้าหลัก',        render: renderHome },
     sales:  { el: 'pageSales',  title: 'ยอดขาย',          render: renderSales },
     orderList: { el: 'pageOrderList', title: 'ออเดอร์ทั้งหมด', render: renderOrderList },
-    views:  { el: 'pageViews',  title: 'สินค้า',           render: renderViewsPage },
+    visits: { el: 'pageVisits', title: 'ยอดการเข้าชมเว็บ', render: renderVisitsPage },
     detail: { el: 'pageDetail', title: detailScopeName,    render: renderDetailPage },
     stock:  { el: 'pageStock',  title: 'สินค้าใกล้หมด',    render: renderStockPage },
     settings: { el: 'pageSettings', title: 'ตั้งค่า',       render: renderSettingsPage },
@@ -2555,7 +2658,7 @@
     setActive('navWeekly', pg === 'sales' && state.sScale === 'week');
     setActive('navMonthly', pg === 'sales' && state.sScale === 'month');
     setActive('navYearly', pg === 'sales' && state.sScale === 'year');
-    setActive('navViews', pg === 'views' || pg === 'detail');
+    setActive('navViews', pg === 'visits' || pg === 'detail');
     setActive('navOrderList', pg === 'orderList');
     setActive('navStock', pg === 'stock');
     setActive('navSettings', pg === 'settings');
@@ -2584,7 +2687,7 @@
   document.getElementById('navWeekly').addEventListener('click', () => { state.sScale = 'week'; state.sSelD = null; showPage('sales'); });
   document.getElementById('navMonthly').addEventListener('click', () => { state.sScale = 'month'; state.sSelD = null; showPage('sales'); });
   document.getElementById('navYearly').addEventListener('click', () => { state.sScale = 'year'; state.sSelD = null; showPage('sales'); });
-  document.getElementById('navViews').addEventListener('click', () => showPage('views'));
+  document.getElementById('navViews').addEventListener('click', () => showPage('visits'));
   document.getElementById('navOrderList').addEventListener('click', () => showPage('orderList'));
   document.getElementById('navStock').addEventListener('click', () => showPage('stock'));
   document.getElementById('navSettings').addEventListener('click', () => showPage('settings'));
@@ -2592,7 +2695,7 @@
   document.getElementById('navTopMonthly').addEventListener('click', () => { state.topScale = 'month'; showPage('topcat'); });
 
   /* home card "เพิ่มเติม" links */
-  document.getElementById('hViewMore').addEventListener('click', () => showPage('views'));
+  document.getElementById('hViewMore').addEventListener('click', () => showPage('visits'));
   document.getElementById('stockMore').addEventListener('click', () => showPage('stock'));
   document.getElementById('orderMore').addEventListener('click', () => showPage('orderList'));
   document.getElementById('hRankMore').addEventListener('click', () => { state.topScale = 'day'; showPage('topcat'); });
@@ -2606,6 +2709,14 @@
   /* ── หน้ายอดขาย (ใหม่): time scale + ปฏิทิน + metric + multi-select ── */
   buildMS('msType', TYPES.map(t => ({ id: t.id, name: t.name })), state.types, 'ทั้งหมด');
   buildMS('msCat', CATS.map(c => ({ id: c.id, name: c.name })), state.cats, 'ทั้งหมด');
+
+  /* ── หน้ายอดการเข้าชมเว็บ: multi-select แพลตฟอร์ม + time scale ── */
+  CHANNELS.forEach(c => { state.vPlats.add(c.name); state.vConvPlats.add(c.name); });
+  const platOpts = CHANNELS.map(c => ({ id: c.name, name: c.name }));
+  buildMS('vPlatMs', platOpts, state.vPlats, 'ทุกแพลตฟอร์ม', renderVisitsPage);
+  buildMS('vConvMs', platOpts, state.vConvPlats, 'ทุกแพลตฟอร์ม', renderVisitsPage);
+  document.getElementById('vScale1Sel').addEventListener('change', e => { state.vScale1 = e.target.value; renderVisitsPage(); });
+  document.getElementById('vScale2Sel').addEventListener('change', e => { state.vScale2 = e.target.value; renderVisitsPage(); });
   for (const tab of document.querySelectorAll('#sScaleTabs .scale-tab'))
     tab.addEventListener('click', () => { state.sScale = tab.dataset.scale; if (tab.dataset.scale !== 'day') state.sSelD = null; renderSales(); updateNav(); });
   function sCalShift(dir) {
@@ -2742,7 +2853,7 @@
   document.getElementById('dSearch').addEventListener('keydown', e => {
     if (e.key === 'Enter') document.getElementById('dSearchBtn').click();
   });
-  document.getElementById('dBack').addEventListener('click', () => showPage('views'));
+  document.getElementById('dBack').addEventListener('click', () => showPage('visits'));
 
   /* "เพิ่มเติม" การ์ดยอดขายหน้าหลัก → หน้ายอดขาย */
   document.getElementById('hSalesMore').addEventListener('click', () => {
