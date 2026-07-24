@@ -706,6 +706,7 @@
     color: var(--inset-ink);
   }
   .month-card:hover { border-color: var(--accent); background: var(--accent-soft); }
+  .month-card.today { box-shadow: inset 0 0 0 2px var(--accent); border-color: var(--accent); }
   .month-card .y { font-size: 0.66rem; color: var(--inset-muted); }
   .month-card .m { font-size: 0.88rem; font-weight: 700; }
   .month-card .sum { font-size: 0.7rem; color: var(--good); font-weight: 600; font-variant-numeric: tabular-nums; }
@@ -1270,6 +1271,11 @@
   function monthTotal(y, m) {
     let s = 0;
     for (const c of activeCats()) s += monthCat(y, m, c.id);
+    return s;
+  }
+  function yearTotal(y) {
+    let s = 0;
+    for (let m = 0; m < 12; m++) s += monthTotal(y, m);
     return s;
   }
   function typeTotal(typeId) {
@@ -2183,24 +2189,83 @@
 
   function renderSalesCal() {
     const y = state.sCalY, m = state.sCalM;
-    document.getElementById('sCalTitle').textContent = `${MONTHS[m]} ${y}`;
-    const grid = document.getElementById('sCalGrid');
-    grid.innerHTML = '';
-    for (const dw of DOWS) { const el = document.createElement('div'); el.className = 'dow'; el.textContent = dw; grid.appendChild(el); }
-    const first = new Date(y, m, 1).getDay(), n = new Date(y, m + 1, 0).getDate();
-    for (let i = 0; i < first; i++) { const el = document.createElement('div'); el.className = 'cal-cell blank'; grid.appendChild(el); }
-    for (let d = 1; d <= n; d++) {
-      const amt = dayTotal(y, m, d);
-      const btn = document.createElement('button');
-      btn.className = 'cal-cell' + (isToday(y, m, d) ? ' today' : '') + (state.sSelD === d ? ' selected' : '');
-      btn.innerHTML = `<span class="d">${d}</span><span class="amt">${fmtCompact(amt)}</span>`;
-      btn.setAttribute('aria-label', `${d} ${MONTHS[m]} ${y} ยอดขาย ${fmtFull(amt)}`);
-      btn.addEventListener('click', () => {
-        state.sSelD = (state.sSelD === d) ? null : d;   /* กดซ้ำ = ยกเลิก กลับดูทั้งเดือน */
-        state.sScale = 'day';
-        renderSales();
-      });
-      grid.appendChild(btn);
+    const scale = state.sScale;
+    const dayGrid = document.getElementById('sCalGrid');
+    const cardGrid = document.getElementById('sMonthGrid');
+    const title = document.getElementById('sCalTitle');
+
+    /* ── รายวัน → ปฏิทินรายวันตามปกติ ── */
+    if (scale === 'day') {
+      dayGrid.hidden = false; cardGrid.hidden = true;
+      title.textContent = `${MONTHS[m]} ${y}`;
+      dayGrid.innerHTML = '';
+      for (const dw of DOWS) { const el = document.createElement('div'); el.className = 'dow'; el.textContent = dw; dayGrid.appendChild(el); }
+      const first = new Date(y, m, 1).getDay(), n = new Date(y, m + 1, 0).getDate();
+      for (let i = 0; i < first; i++) { const el = document.createElement('div'); el.className = 'cal-cell blank'; dayGrid.appendChild(el); }
+      for (let d = 1; d <= n; d++) {
+        const amt = dayTotal(y, m, d);
+        const btn = document.createElement('button');
+        btn.className = 'cal-cell' + (isToday(y, m, d) ? ' today' : '') + (state.sSelD === d ? ' selected' : '');
+        btn.innerHTML = `<span class="d">${d}</span><span class="amt">${fmtCompact(amt)}</span>`;
+        btn.setAttribute('aria-label', `${d} ${MONTHS[m]} ${y} ยอดขาย ${fmtFull(amt)}`);
+        btn.addEventListener('click', () => {
+          state.sSelD = (state.sSelD === d) ? null : d;   /* กดซ้ำ = ยกเลิก กลับดูทั้งเดือน */
+          state.sScale = 'day';
+          renderSales();
+        });
+        dayGrid.appendChild(btn);
+      }
+      return;
+    }
+
+    /* ── รายสัปดาห์ / รายเดือน / รายปี → ใช้การ์ดกริด ── */
+    dayGrid.hidden = true; cardGrid.hidden = false;
+    cardGrid.innerHTML = '';
+
+    if (scale === 'week') {
+      /* แบ่งเดือนเป็นช่วงสัปดาห์ละ 7 วัน */
+      title.textContent = `${MONTHS[m]} ${y}`;
+      const n = new Date(y, m + 1, 0).getDate();
+      let wk = 0;
+      for (let start = 1; start <= n; start += 7) {
+        wk++;
+        const end = Math.min(start + 6, n);
+        let sum = 0;
+        for (let d = start; d <= end; d++) sum += dayTotal(y, m, d);
+        const card = document.createElement('button');
+        card.className = 'month-card';
+        card.innerHTML = `<span class="y">${start}–${end} ${MONTHS_S[m]}</span><span class="m">สัปดาห์ที่ ${wk}</span><span class="sum">${fmtCompact(sum)}</span>`;
+        card.setAttribute('aria-label', `สัปดาห์ที่ ${wk} (${start}–${end} ${MONTHS[m]}) ยอดขาย ${fmtFull(sum)}`);
+        card.addEventListener('click', () => { state.sScale = 'day'; state.sSelD = null; renderSales(); updateNav(); });
+        cardGrid.appendChild(card);
+      }
+    } else if (scale === 'month') {
+      /* 12 เดือนของปีนั้น */
+      title.textContent = `ปี ${y}`;
+      for (let mm = 0; mm < 12; mm++) {
+        const sum = monthTotal(y, mm);
+        const isCur = y === today.getFullYear() && mm === today.getMonth();
+        const card = document.createElement('button');
+        card.className = 'month-card' + (isCur ? ' today' : '');
+        card.innerHTML = `<span class="y">${y}</span><span class="m">${MONTHS_S[mm]}</span><span class="sum">${fmtCompact(sum)}</span>`;
+        card.setAttribute('aria-label', `${MONTHS[mm]} ${y} ยอดขาย ${fmtFull(sum)}`);
+        card.addEventListener('click', () => { state.sScale = 'day'; state.sCalM = mm; state.sSelD = null; renderSales(); updateNav(); });
+        cardGrid.appendChild(card);
+      }
+    } else {
+      /* รายปี → 8 ปีย้อนหลังถึงปี anchor */
+      const years = [];
+      for (let yy = y - 7; yy <= y; yy++) years.push(yy);
+      title.textContent = `${years[0]}–${years[years.length - 1]}`;
+      for (const yy of years) {
+        const sum = yearTotal(yy);
+        const card = document.createElement('button');
+        card.className = 'month-card' + (yy === today.getFullYear() ? ' today' : '');
+        card.innerHTML = `<span class="y">ปี</span><span class="m">${yy}</span><span class="sum">${fmtCompact(sum)}</span>`;
+        card.setAttribute('aria-label', `ปี ${yy} ยอดขาย ${fmtFull(sum)}`);
+        card.addEventListener('click', () => { state.sScale = 'month'; state.sCalY = yy; state.sSelD = null; renderSales(); updateNav(); });
+        cardGrid.appendChild(card);
+      }
     }
   }
 
@@ -2537,12 +2602,21 @@
   buildMS('msCat', CATS.map(c => ({ id: c.id, name: c.name })), state.cats, 'ทั้งหมด');
   for (const tab of document.querySelectorAll('#sScaleTabs .scale-tab'))
     tab.addEventListener('click', () => { state.sScale = tab.dataset.scale; if (tab.dataset.scale !== 'day') state.sSelD = null; renderSales(); updateNav(); });
-  document.getElementById('sCalPrev').addEventListener('click', () => {
-    state.sCalM--; if (state.sCalM < 0) { state.sCalM = 11; state.sCalY--; } state.sSelD = null; renderSales();
-  });
-  document.getElementById('sCalNext').addEventListener('click', () => {
-    state.sCalM++; if (state.sCalM > 11) { state.sCalM = 0; state.sCalY++; } state.sSelD = null; renderSales();
-  });
+  function sCalShift(dir) {
+    const sc = state.sScale;
+    if (sc === 'month') {            /* เลื่อนทีละปี */
+      state.sCalY += dir;
+    } else if (sc === 'year') {      /* เลื่อนทีละชุด 8 ปี */
+      state.sCalY += dir * 8;
+    } else {                         /* รายวัน/รายสัปดาห์ → เลื่อนทีละเดือน */
+      state.sCalM += dir;
+      if (state.sCalM < 0) { state.sCalM = 11; state.sCalY--; }
+      if (state.sCalM > 11) { state.sCalM = 0; state.sCalY++; }
+    }
+    state.sSelD = null; renderSales();
+  }
+  document.getElementById('sCalPrev').addEventListener('click', () => sCalShift(-1));
+  document.getElementById('sCalNext').addEventListener('click', () => sCalShift(1));
   for (const r of document.querySelectorAll('#sMetricRadios input'))
     r.addEventListener('change', () => { state.sMetric = r.value; renderSales(); });
   /* ปิด multi-select เมื่อคลิกนอกกล่อง */
