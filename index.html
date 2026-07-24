@@ -620,6 +620,19 @@
 
   .filter-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
   .filter-head h2 { margin: 0; font-size: 1rem; font-weight: 800; color: var(--on-blue); }
+  /* ตารางอันดับ click rate แบบกระชับ (ส่วนล่างหน้ายอดการเข้าชมเว็บ) */
+  .rank-compact { padding: 16px 18px; }
+  .rank-compact .filter-head { margin-bottom: 10px; }
+  .rank-compact .filter-head h2 { font-size: 0.9rem; }
+  .rank-compact .trend-controls { gap: 8px; }
+  .rank-compact .trend-controls select,
+  .rank-compact .trend-controls .search-btn { font-size: 0.78rem; padding: 6px 12px; }
+  .rank-compact .trend-caption { font-size: 0.68rem; margin: 8px 0 2px; }
+  .rank-compact .table-panel { padding: 2px 12px; border-radius: 12px; }
+  .rank-compact .data-table { font-size: 0.76rem; }
+  .rank-compact .data-table th { padding: 7px 6px; font-size: 0.68rem; }
+  .rank-compact .data-table td { padding: 6px 6px; }
+  .rank-compact .data-table .goto { font-size: 0.66rem; }
   .draft-tag {
     font-size: 0.68rem; font-weight: 700; letter-spacing: 0.04em;
     background: var(--accent-soft); color: var(--accent);
@@ -1029,7 +1042,7 @@
       </div>
 
       <!-- ระบบเดิม: อันดับสินค้าตาม Click rate (ย่อลงมาอยู่ด้านล่าง) -->
-      <section class="card-blue">
+      <section class="card-blue rank-compact">
         <div class="filter-head">
           <h2>อันดับสินค้าตาม Click rate</h2>
           <span class="draft-tag">ฉบับร่าง · ปรับได้ภายหลัง</span>
