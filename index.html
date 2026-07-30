@@ -2208,8 +2208,8 @@
         <td>${p.lead}–${p.lead + 2} วัน</td>
         <td>
           <div class="stock-order-cell">
-            <select class="stock-period" data-code="${p.code}" aria-label="ช่วงเวลายอดสั่งซื้อ ${p.code}">${opts}</select>
             <div class="stock-oval">${fmtNum(pastOrders(p.code, period))} รายการ</div>
+            <select class="stock-period" data-code="${p.code}" aria-label="ช่วงเวลายอดสั่งซื้อ ${p.code}">${opts}</select>
           </div>
         </td>
       </tr>`;
