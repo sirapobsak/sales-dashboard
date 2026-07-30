@@ -349,7 +349,8 @@
     background-repeat: no-repeat; background-position: right 10px center;
   }
   .stock-period:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-  .stock-oval { margin-top: 6px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .stock-order-cell { display: inline-flex; align-items: center; gap: 10px; flex-wrap: nowrap; }
+  .stock-oval { font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
 
   .ai-panel {
     background: var(--inset); color: var(--inset-ink); border-radius: 16px;
@@ -2206,8 +2207,10 @@
         <td><span class="stock-left ${cls}">${p.left}</span> ชิ้น</td>
         <td>${p.lead}–${p.lead + 2} วัน</td>
         <td>
-          <select class="stock-period" data-code="${p.code}" aria-label="ช่วงเวลายอดสั่งซื้อ ${p.code}">${opts}</select>
-          <div class="stock-oval">${fmtNum(pastOrders(p.code, period))} รายการ</div>
+          <div class="stock-order-cell">
+            <select class="stock-period" data-code="${p.code}" aria-label="ช่วงเวลายอดสั่งซื้อ ${p.code}">${opts}</select>
+            <div class="stock-oval">${fmtNum(pastOrders(p.code, period))} รายการ</div>
+          </div>
         </td>
       </tr>`;
     }).join('');
