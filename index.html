@@ -319,7 +319,15 @@
     border-radius: 99px; text-align: center;
     font-weight: 800; font-size: 1rem; padding: 11px;
   }
-  .ot-card .table-panel { flex: 1; }
+  .ot-count {
+    display: inline-block; margin-left: 8px; vertical-align: middle;
+    font-size: 0.8rem; font-weight: 800; color: var(--accent);
+    background: var(--accent-soft); border-radius: 99px; padding: 2px 12px;
+  }
+  .ot-card .table-panel { flex: 1; max-height: 300px; overflow-y: auto; padding-top: 0; }
+  .ot-card .table-panel .data-table thead th {
+    position: sticky; top: 0; background: var(--inset); z-index: 1;
+  }
   .stars { color: var(--os-prep); letter-spacing: 1px; font-size: 0.82rem; }
   .stage-tag.tag-express { background: var(--s4); color: #fff; }
   .stage-tag.tag-normal { background: #6b7280; color: #fff; }
@@ -968,7 +976,7 @@
       <section class="card-blue">
         <div class="ot-grid">
           <div class="ot-card">
-            <div class="ot-title">ที่ต้องจัดส่ง</div>
+            <div class="ot-title">ที่ต้องจัดส่ง <span class="ot-count" id="otTodoCount"></span></div>
             <div class="table-panel">
               <table class="data-table">
                 <thead><tr><th>รายการสินค้า</th><th>ที่อยู่ปลายทาง</th><th>วันที่ต้องส่งถึง</th><th>สถานะ</th></tr></thead>
@@ -977,7 +985,7 @@
             </div>
           </div>
           <div class="ot-card">
-            <div class="ot-title">เตรียมจัดส่ง</div>
+            <div class="ot-title">เตรียมจัดส่ง <span class="ot-count" id="otPrepCount"></span></div>
             <div class="table-panel">
               <table class="data-table">
                 <thead><tr><th>รายการสินค้า</th><th>ที่อยู่ปลายทาง</th><th>วันที่ต้องส่งถึง</th><th>สถานะ</th></tr></thead>
@@ -986,7 +994,7 @@
             </div>
           </div>
           <div class="ot-card">
-            <div class="ot-title">กำลังจัดส่ง</div>
+            <div class="ot-title">กำลังจัดส่ง <span class="ot-count" id="otShipCount"></span></div>
             <div class="table-panel">
               <table class="data-table">
                 <thead><tr><th>รายการสินค้า</th><th>เดดไลน์ที่ต้องถึง</th><th>ที่อยู่ปลายทาง</th><th>ชื่อขนส่ง</th></tr></thead>
@@ -995,7 +1003,7 @@
             </div>
           </div>
           <div class="ot-card">
-            <div class="ot-title">จัดส่งแล้ว</div>
+            <div class="ot-title">จัดส่งแล้ว <span class="ot-count" id="otDoneCount"></span></div>
             <div class="table-panel">
               <table class="data-table">
                 <thead><tr><th>รายการสินค้า</th><th>วันที่ถึง</th><th>รีวิว</th><th>ยอดขาย</th></tr></thead>
@@ -1936,14 +1944,30 @@
     : '<span class="stage-tag tag-normal">ส่งปกติ</span>';
 
   function renderOrderList() {
-    const pending = seed => otRows(seed, 4).map(o =>
+    const N = 10;
+    const byDue = (a, b) => a.due - b.due;                 /* ต้องส่งเร็วสุดก่อน */
+    const setCount = (id, rows) => {
+      document.getElementById(id).textContent = `${rows.reduce((s, o) => s + o.qty, 0)} ชิ้น`;
+    };
+    /* 3 กลุ่มที่ยังไม่ถึงปลายทาง → เรียงตามเดดไลน์ใกล้สุด; จัดส่งแล้ว → ล่าสุดก่อน */
+    const todo = otRows('ot-todo', N).sort(byDue);
+    const prep = otRows('ot-prep', N).sort(byDue);
+    const ship = otRows('ot-ship', N).sort(byDue);
+    const done = otRows('ot-done', N).sort((a, b) => b.arrived - a.arrived);
+
+    const pendingHtml = rows => rows.map(o =>
       `<tr><td>${prodCell(o)}</td><td>${o.address}</td><td class="num">${relDate(o.due)}</td><td>${shipTag(o)}</td></tr>`).join('');
-    document.getElementById('otTodo').innerHTML = pending('ot-todo');
-    document.getElementById('otPrep').innerHTML = pending('ot-prep');
-    document.getElementById('otShip').innerHTML = otRows('ot-ship', 4).map(o =>
+    document.getElementById('otTodo').innerHTML = pendingHtml(todo);
+    document.getElementById('otPrep').innerHTML = pendingHtml(prep);
+    document.getElementById('otShip').innerHTML = ship.map(o =>
       `<tr><td>${prodCell(o)}</td><td class="num">${relDate(o.due)}</td><td>${o.address}</td><td>${o.carrier}</td></tr>`).join('');
-    document.getElementById('otDone').innerHTML = otRows('ot-done', 4).map(o =>
+    document.getElementById('otDone').innerHTML = done.map(o =>
       `<tr><td>${prodCell(o)}</td><td class="num">${relDate(o.arrived)}</td><td>${starHtml(o.rating)}</td><td class="num">${fmtFull(o.sales)}</td></tr>`).join('');
+
+    setCount('otTodoCount', todo);
+    setCount('otPrepCount', prep);
+    setCount('otShipCount', ship);
+    setCount('otDoneCount', done);
   }
 
   /* ══ PAGE: สินค้า — อันดับตาม click rate ═══════════════════════ */
